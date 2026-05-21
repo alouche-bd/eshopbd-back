@@ -15,6 +15,12 @@ class Kernel extends ConsoleKernel
     protected $commands = [
         \App\Console\Commands\SyncDistributorUsers::class,
         \App\Console\Commands\MailTestCommand::class,
+        // Stubs for Laravel-only commands that Railpack invokes during build.
+        // See NoopLaravelCacheCommand.php for the why.
+        \App\Console\Commands\NoopConfigCacheCommand::class,
+        \App\Console\Commands\NoopConfigClearCommand::class,
+        \App\Console\Commands\NoopRouteCacheCommand::class,
+        \App\Console\Commands\NoopViewCacheCommand::class,
     ];
 
     /**
