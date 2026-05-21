@@ -13,6 +13,9 @@
     "libicu-dev",
     "libzip-dev",
     "libgd-dev",
+    "libpng-dev",
+    "libjpeg-dev",
+    "libfreetype6-dev",
     "libxml2-dev",
     "libssl-dev"
   ]
