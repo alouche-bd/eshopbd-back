@@ -21,6 +21,7 @@ class Kernel extends ConsoleKernel
         \App\Console\Commands\NoopConfigClearCommand::class,
         \App\Console\Commands\NoopRouteCacheCommand::class,
         \App\Console\Commands\NoopViewCacheCommand::class,
+        \App\Console\Commands\NoopEventCacheCommand::class,
     ];
 
     /**
