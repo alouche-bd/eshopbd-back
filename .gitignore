@@ -28,3 +28,8 @@ Thumbs.db
 *.swp
 *.swo
 *~
+
+# Adobe / CAD source files — keep exports (png/jpg), not sources
+*.ai
+*.eps
+*.dwg
