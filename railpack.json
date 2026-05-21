@@ -18,5 +18,8 @@
     "libfreetype6-dev",
     "libxml2-dev",
     "libssl-dev"
-  ]
+  ],
+  "deploy": {
+    "startCommand": "php -S 0.0.0.0:${PORT:-8000} -t public public/index.php"
+  }
 }
