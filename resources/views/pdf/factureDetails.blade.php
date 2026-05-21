@@ -1,0 +1,989 @@
+<html lang="fr">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <style>
+    @page: first {
+        margin: 0 0 40px;
+        font-size: 13px;
+    }
+
+    @page {
+        margin: 30px 0 40px;
+        font-size: 13px;
+    }
+
+    p {
+        margin-bottom: 14px !important;
+    }
+
+    #footer {
+        position: fixed;
+        left: 15px;
+        right: 15px;
+    }
+
+    .logo-left {
+        position: absolute;
+        left: 10px;
+        top: -190px
+    }
+
+    .logo-right {
+        position: absolute;
+        top: -200px;
+        right: 10px;
+    }
+
+    #footer {
+        bottom: -40px;
+        height: 40px;
+        font-style: bold;
+        text-align: center;
+        font-size: xx-small;
+    }
+
+    .footer-not-bold {
+        font-style: normal;
+    }
+
+    #content {
+        margin: 180px 25px 25px;
+        position: relative;
+    }
+
+    .breakafter {
+        page-break-after: always;
+    }
+
+    .facture-title {
+        font-size: 25px;
+        font-style: bold;
+        width: 100%;
+        text-align: center;
+        position: absolute;
+        top: -90px;
+    }
+
+    .identifiants {
+        text-align: left;
+        width: 410px;
+    }
+
+    .identifiants-client {
+        padding-left: 20px;
+        font-style: bold;
+    }
+
+    .reference-client {
+        font-style: bold;
+        padding-left: 40px;
+        width: 120px;
+    }
+
+    .reference-rib {
+        padding-left: 15px;
+        width: 120px;
+    }
+
+    .numLot {
+        font-style: bold;
+        font-size: 12px;
+    }
+
+    .adresse {
+        width: 420px;
+        text-align: left;
+    }
+
+    .bold {
+        font-style: bold;
+    }
+
+    .col-ref {
+        max-width: 135px;
+        width: 130px;
+        border-right: solid 1px;
+        padding: 5px;
+        vertical-align: top;
+    }
+
+    .col-designation {
+        max-width: 250px;
+        width: 250px;
+        border-right: solid 1px;
+        padding: 5px;
+        vertical-align: top;
+    }
+
+    .col-quantite {
+        max-width: 55px;
+        width: 40px;
+        border-right: solid 1px;
+        padding: 5px;
+        vertical-align: top;
+        text-align: right;
+    }
+
+    .col-px {
+        max-width: 70px;
+        width: 70px;
+        border-right: solid 1px;
+        padding: 5px;
+        vertical-align: top;
+        text-align: right;
+    }
+
+    .col-remise {
+        max-width: 70px;
+        border-right: solid 1px;
+        padding: 5px;
+        vertical-align: top;
+        text-align: right;
+    }
+
+    .col-tva {
+        width: 40px;
+        border-right: solid 1px;
+        padding: 5px;
+        vertical-align: top;
+        text-align: right;
+    }
+
+    .col-montant {
+        max-width: 70px;
+        width: 70px;
+        padding: 5px;
+        vertical-align: top;
+        text-align: right;
+    }
+
+    .table-border {
+        border-collapse: collapse;
+        border: solid 1px;
+        font-size: 12px;
+    }
+
+    .row-id {
+        width: 1000px;
+        height: 150px;
+    }
+
+    .pied {
+        position: relative;
+        margin-top: 20px;
+    }
+
+    .thead {
+        padding: 0;
+        border-bottom: solid 1px;
+    }
+
+    .col-base {
+        padding: 2px;
+        width: 65px;
+        max-width: 65px;
+        text-align: center;
+    }
+
+    .col-taux {
+        padding: 2px;
+        width: 65px;
+        max-width: 65px;
+        text-align: center;
+    }
+
+    .col-tot {
+        padding: 2px;
+        width: 65px;
+        max-width: 65px;
+        text-align: center;
+    }
+
+    .total {
+        border: solid 1px;
+        padding: 8px;
+        margin-bottom: 20px;
+        width: 270px;
+        position: relative;
+        left: 460px;
+        page-break-inside: avoid;
+    }
+
+    .total_lignes {
+        width: 120px;
+        padding-left: 35px;
+    }
+
+    .reference {
+        border: solid 1px;
+        border-style: dotted;
+        width: 270px;
+        padding: 8px;
+        position: relative;
+        left: 460px;
+        page-break-inside: avoid;
+    }
+
+    .reglement {
+        position: relative;
+        page-break-inside: avoid;
+    }
+
+    .lignes {
+        position: relative;
+        top: 0;
+    }
+
+    .tva {
+        position: relative;
+        font-size: 12px;
+        margin-bottom: 40px;
+    }
+
+    .conditions {
+        position: relative;
+        height: 0;
+        page-break-inside: avoid;
+    }
+
+    .cgv {
+        font-size: 8px;
+        text-align: justify;
+        margin-bottom: -5px !important;
+    }
+
+    .cgv-head {
+        text-align: center;
+        font-size: 9px;
+        font-weight: normal;
+        margin-bottom: 30px;
+    }
+
+    .cgv-title {
+        text-align: center;
+        font-size: 9px;
+        font-weight: normal;
+        font-style: italic;
+        padding: 0 !important;
+    }
+
+    .center {
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .iban {
+        padding-left: 8px;
+    }
+    </style>
+    <title>Facture
+        {{$data['result']['numero']}}
+    </title>
+</head>
+
+<body>
+    <div id="footer">305 ALLEES DE CRAPONNE - 13300 SALON DE PROVENCE - FRANCE - Tel: 04 90 44 60 60 Fax: 04 90 44 60 61
+        <br />
+        <spans class="footer-not-bold">S.A.S. au capital de 24 866 417 Euros - R.C.S SALON DE PROVENCE - SIRET 795 001
+            304 00018 - TVA FR 31 795 001 304</span>
+    </div>
+    <div id="content">
+        <div class="breakafter">
+            <div class="logo-left">
+                <img src="data:image/png;base64,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"
+                    style="width: 38%" alt="logo">
+            </div>
+            <div class="logo-right">
+                <img src="data:image/png;base64,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"
+                    style="width: 15%" alt="logo">
+            </div>
+            <div class="facture-title"> FACTURE </div>
+            <div class="row-id">
+                <table>
+                    <thead></thead>
+                    <tbody>
+                        <tr>
+                            <td class="identifiants">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th></th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td> Numéro
+                                            </td>
+                                            <td class="identifiants-client">{{$data['result']['numero']}}</td>
+                                        </tr>
+                                        <tr>
+                                            <td> Date
+                                            </td>
+                                            <td class="identifiants-client">
+                                                <?php echo (date("d-m-Y", strtotime($data['result']['date']))); ?></td>
+                                        </tr>
+
+
+
+                                        <tr>
+                                            <td> Numéro de client
+                                            </td>
+                                            <td class="identifiants-client">{{$data['codeClient']}}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </td>
+                            <td class="adresse">
+                                <table>
+                                    <thead></thead>
+                                    <tbody>
+                                        <tr>
+                                            <td class="bold">
+                                                {{$data['result']['facturation']['intitule']}}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>{{$data['result']['facturation']['adresse']}}</td>
+                                        </tr>
+                                        @if ($data['result']['facturation']['adresse2'] )
+                                        <tr>
+                                            <td>{{$data['result']['facturation']['adresse2']}}</td>
+                                        </tr>
+                                        @endif
+                                        @if ($data['result']['facturation']['adresse3'] )
+                                        <tr>
+                                            <td>{{$data['result']['facturation']['adresse3']}}</td>
+                                            @endif
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                               {{$data['result']['facturation']['codepostal']}}
+                                                {{$data['result']['facturation']['ville']}}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            @if ($data['result']['facturation']['pays'] == '1 FRANCE' )
+                                            <td>FRANCE</td>
+                                            @else
+                                            <td>{{$data['result']['facturation']['pays']}}</td>
+                                        </tr>
+                                        @endif
+                                    </tbody>
+                                </table>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="lignes">
+                <table class="table-border center">
+                    <thead class="thead" style="text-align:center">
+                        <tr>
+                            <th class="col-ref"> Référence </th>
+                            <th class="col-designation"> Désignation </th>
+                            <th class="col-quantite"> Qté </th>
+                            <th class="col-px"> Px unitaire </th>
+                            <th class="col-tva"> TVA </th>
+                            @if ($data['remiseTot'] == 0 )
+                            @else
+                            <th class="col-remise"> Remise </th>
+                            @endif
+                            <th class="col-montant"> Montant HT </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($data['result']['lignes']['ligne'] as $ligne)
+                        @if ($ligne['article'] == "" )
+                        <tr>
+                            <td class="col-ref"></td>
+                            <td class="col-designation">{{$ligne['designation']}}</td>
+                            <td class="col-quantite"></td>
+                            <td class="col-px"></td>
+                            <td class="col-tva"></td>
+                            @if ($data['remiseTot'] == 0 )
+                            @else
+                            <td class="col-remise"></td>
+                            @endif
+                            <td class="col-montant"></td>
+                        </tr>
+                        @else
+                        <tr>
+                            <td class="col-ref">{{$ligne['article']}}</td>
+                            <td class="col-designation">{{$ligne['designation']}}
+                            <td class="col-quantite">{{$ligne['quantite']}}</td>
+                            <td class="col-px">{{$ligne['prixnetht']}}
+                                EUR</td>
+                            <td class="col-tva">
+                                {{$ligne['taxetaux']}} %
+                            </td>
+                            @if ($data['remiseTot'] == 0 )
+                            @else
+                            <td class="col-remise">{{$ligne['remise1']}}</td>
+                            @endif
+                            <td class="col-montant">{{$ligne['prixnetht']}}
+                                EUR</td>
+                        </tr>
+                        @endif
+                        @endforeach
+                    </tbody>
+                    </tbody>
+                    </tbody>
+                </table>
+                <div class="pied">
+                    <div class="conditions">
+                        <span style="font-style: bold"> Conditions de règlement et
+                            échéance(s) </span><br />
+                        Paiement de {{$data['result']['echeances']['echeance'][0]['montant']}} EUR à effectuer avant
+                        le
+                        <?php echo (date("d-m-Y", strtotime($data['result']['echeances']['echeance'][0]['date']))); ?>
+                        </td>
+
+                        <br />
+                        <br />
+                        <span class="bold"> Règlement à effectuer à l'ordre de </span>
+                        <br />
+                        S.A.S BIOTECH DENTAL
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th></th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>SMC</td>
+                                    <td class="reference-rib ">IBAN : FR76 3007 7048 8111 4199 0020 009<br />BIC :
+                                        <span class="iban">SMCTFR2A</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>BPPC
+                                    </td>
+                                    <td class="reference-rib ">IBAN : FR76 1460 7000 5066 0218 1898 849<br />BIC :
+                                        <span class="iban">CCBPFRPPMAR</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>HSBC
+                                    </td>
+                                    <td class="reference-rib ">IBAN : FR76 3005 6009 6909 6900 1277 524<br />BIC :
+                                        <span class="iban">CCFRFRPP</span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="total">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th></th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td> TOTAL HT </td>
+                                    <td class="total_lignes">{{$data['result']['totalht']}}
+                                        EUR</td>
+                                </tr>
+                                <tr>
+                                    <td> TOTAL TVA
+                                    </td>
+                                    <td class="total_lignes">
+
+                                        {{$data['result']['totalttc'] - $data['result']['totalht']}} EUR
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td> NET A PAYER
+                                    </td>
+                                    <td class="total_lignes bold">{{$data['result']['totalttc']}}
+                                        EUR</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="reference">
+                        <span class="bold"> Référence à joindre avec votre réglement </span>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th></th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td> N° de Facture </td>
+                                    <td class="reference-client">BD-{{$data['result']['numero']}}</td>
+                                </tr>
+                                <tr>
+                                    <td> Code Client
+                                    </td>
+                                    <td class="reference-client">{{$data['codeClient']}}</td>
+                                </tr>
+                                <tr>
+                                    <td> Date
+                                    </td>
+                                    <td class="reference-client">{{$data['result']['date']}}</td>
+                                </tr>
+                                <tr>
+                                    <td> Net à Payer
+                                    </td>
+                                    <td class="reference-client">{{$data['result']['totalttc']}}
+                                        EUR</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="cgv">
+            <h5 class="cgv-head bold"> CONDITIONS GENERALES DE VENTE </h5>
+            <p class="cgv-title"> PRÉAMBULE </p>
+            <p> Les présentes Conditions Générales de Vente ont pour objet de régir les relations
+                contractuelles entre vous (ci-après le Client) et la Société BIOTECH DENTAL, société par actions
+                simplifiée au capital de 24 866 417,00 euros, dont le siège social se situe 305 Allée de Craponne 13300
+                Salon-de-Provence, immatriculée au Registre du Commerce et des Sociétés de Salon-de- Provence sous le
+                numéro 795 001 304, dont le numéro TVA intracommunautaire est FR 31 79 500 13 04, dont l’adresse mail de
+                contact est info@biotech-dental.com et dont le numéro de téléphone est +33(0)4 90 44 60 60 (ci-après la
+                Société). La Société commercialise des dispositifs médicaux destinés aux chirurgiens-dentistes,
+                orthodontistes et Laboratoires de prothèses dentaires. La Société fournira les marchandises au Client
+                conformément aux conditions générales ci-après définies. Le Client déclare connaître et accepter les
+                conditions de vente. Toute(s) autre(s) modalité(s) et condition(s) sont exclues et ne sont pas
+                applicables sans le consentement préalable écrit de la Société. Le seul fait de passer commande implique
+                sans réserve l’acceptation des présentes conditions générales. Par conséquent, le Client est réputé
+                accepter sans réserve l’intégralité des dispositions des présentes conditions. </p>
+            <p class="cgv-title"> Article n°1 : OBJET </p>
+            <p> 1.1 Les conditions générales de vente décrites ci-après détaillent les droits et obligations
+                de la Société et de son Client dans le cadre de la vente des marchandises.<br />
+                1.2. Les biens vendus par la Société s’adressent à des professionnels : les Clients ne peuvent donc pas
+                se prévaloir des dispositions du Code de la consommation, en particulier du droit de rétractation.<br />
+                1.3. Elles s’appliquent quelles que soient les clauses qui figurent dans les documents du Client et
+                notamment dans ses conditions générales d’achat. </p>
+            <p class="cgv-title"> Article n°2 : CHAMP CONTRACTUEL </p>
+            <p> 2.1. Les présentes CGV, ainsi que, le cas échéant, les conditions particulières de vente et/ou
+                le devis ou le bon de commande, expriment l’intégralité de l’accord des parties. Ces dernières ne
+                pourront donc se prévaloir d’aucun autre document, contrat ou échange antérieurs à la validation du bon
+                de commande.<br />
+                2.2. Lorsqu’elles existent pour certains produits, les conditions particulières de vente précisent ou
+                complètent les présentes CGV. En cas de contradiction entre les conditions particulières de vente et les
+                présentes CGV, les dispositions des conditions particulières de vente priment.<br />
+                2.3. Dans le cas où l’une quelconque des dispositions des présentes CGV serait déclarée nulle ou non
+                écrite, par un tribunal compétent, les autres dispositions resteront intégralement en vigueur et seront
+                interprétées de façon à respecter l’intention originelle des parties.<br />
+                2.4. La Société peut modifier à tout moment les présentes CGV. Les CGV applicables sont celles qui sont
+                consultables en ligne sur le site « www.biotech-dental.com ». Le Client en prend connaissance et les
+                accepte, sans réserve, par la seule passation de sa commande. </p>
+            <p class="cgv-title"> Article n°3 : DOCUMENTS COMMERCIAUX ET PORTEE DE L’OFFRE </p>
+            <p> Les plaquettes et autres documents commerciaux édités ou publiés par la Société présentent
+                l’offre de biens de la Société. Elle se réserve le droit, avec ou sans préavis, de limiter la quantité
+                disponible ou d’interrompre la mise en vente de tout produit. Les photographies, visuels et descriptifs
+                présentés dans ces documents commerciaux publiés sur le site ou distribués ne sont pas
+                contractuels. </p>
+            <p class="cgv-title"> Article n°4 : COMMANDE </p>
+            <p> Toutes les commandes seront passées par téléphone ou par courrier électronique.<br />
+                Aucune commande ne sera acceptée par télécopie (fax).
+                <br />
+                Toute commande enregistrée par la Société ne pourra être annulée et devra faire l’objet de la réception
+                des marchandises et du règlement intégral de ces marchandises. Les informations contractuelles sont
+                données en langue française.
+                <br />
+                Lors de la commande, le Client devra fournir à la Société les éléments demandés nécessaires à la
+                transaction, dans les délais impartis (RIB, adresse de facturation…). La Société se dégage de toute
+                responsabilité quant aux erreurs de saisie de ces informations. La Société se réserve le droit de
+                suspendre toute commande d’un Client au sujet duquel il existerait un litige relatif au paiement d’une
+                commande antérieure.
+                <br />
+                Les commandes sont définitives dès réception de celles-ci par la Société.
+                <br />
+                Après expédition de la commande une acture est adressée au Client.
+            </p>
+            <p class="cgv-title"> Article n°5 : OBLIGATIONS DES PARTIES EN CAS DE VENTE DE BIENS
+            </p>
+            <p> 5.1. Obligations de la Société<br /><br />
+                5.1.1 Conformément aux dispositions légales, la Société s’engage à livrer un bien conforme au contrat et
+                répond des défauts de conformité existants lors de la délivrance. La Société garantit également le
+                Client contre les défauts cachés de la chose vendue, dans les conditions posées par les articles 1641 et
+                suivants du Code civil.<br /><br />
+                5.2. Obligations du Client<br /><br />
+                5.2.1. Le Client s’engage à régler le prix et à respecter les modalités et dates de règlement
+                mentionnées dans les conditions particulières de vente et/ou le devis ou le bon de commande.<br />
+                5.2.2. Le Client s’engage à fournir toutes les informations utiles à la transaction ainsi qu’à la
+                livraison (nom, adresse…). À défaut, la Société n’est pas tenue de valider la commande. La Société se
+                dégage de toute responsabilité quant aux erreurs de saisie de ces informations. Lorsque l’insuffisance
+                ou le caractère erroné des informations fournies par le Client entraîne l’impossibilité de livrer le
+                bien, le Client ne peut prétendre à aucun remboursement.
+                En outre, le Client s’engage à informer immédiatement la Société de tout changement de forme juridique
+                d’exploitation, d’adresse de livraison ou de facturation, de coordonnées bancaires, de coordonnées
+                téléphoniques, ou de tout autre changement ayant une incidence sur la relation contractuelle (SIRET,
+                adresse mail, Laboratoire partenaire, …).<br />
+                5.2.3. Le Client doit contrôler le bien lors de la livraison. Toute demande de retour doit être formulée
+                conformément à l’article 6.2. A défaut de retour, le Client est réputé avoir accepté les produits.<br />
+                5.2.4. En cas d’inexécution totale ou partielle de ses obligations par le Client, la Société pourra
+                mettre fin au contrat de plein droit, cinq jours calendaires après l’envoi d’une mise en demeure restée
+                infructueuse. </p>
+            <p class="cgv-title"> Article n°6 : LIVRAISON ET RETOUR DE MARCHANDISES </p>
+            <p> 6.1 Livraison<br /><br />
+                La livraison est possible en France métropolitaine. La livraison à destination des DOM TOM et à
+                l’étranger est possible sous conditions. La livraison est effectuée au lieu indiqué par le Client dans
+                le formulaire. Le délai de livraison indiqué lors de l’enregistrement de la commande n’est donné qu’à
+                titre indicatif et n’est aucunement garanti. Par voie de conséquence, tout retard raisonnable dans la
+                livraison des produits ne pourra pas donner lieu au profit du Client à l’allocation de dommages et
+                intérêts, à l’annulation de la commande et/ou à un refus de marchandises.<br />
+                En cas de refus de livraison sans motif légitime le Client devra s’acquitter de tous les frais ou pertes
+                subis par la Société du fait de ce refus, y compris les frais d’entreposage, et ce jusqu’à acceptation
+                de la livraison. La livraison de toute commande d’un montant inférieur à 50 EUR HT sera facturée au tarif
+                en vigueur. Les commandes supérieures à ce montant seront franco de port. Toute demande de livraison
+                dans le respect d’impératifs horaires (avant 9h00, avant 10h00 et le samedi matin) sera facturée au
+                tarif en vigueur si la commande est inférieure à 300EUR HT. Les commandes supérieures à ce montant seront
+                franco de port. Les livraisons dans les départements d’outre-mer ou à l’étranger seront facturées au
+                tarif en vigueur.<br /><br />
+                6.2 Retour<br /><br />
+                Toute demande de retour doit être formulée dans un délai de 10 jours à compter de la réception de la
+                marchandise. Le Client devra formuler sa demande de retour par appel téléphonique à l’Administration des
+                Ventes de la Société. Après acceptation par la Société de la demande de retour, la Société établi un Bon
+                de retour qu’elle adresse au Client. Le bon de retour établi par la Société doit être obligatoirement
+                joint à l’expédition.<br />
+                Le délai de retour des produits est de 30 jours à compter de la date de facturation. Passé ce délai,
+                le
+                Client est réputé avoir accepté les produits. Pour l’établissement d’un avoir correspondant à un retour,
+                le Client doit indiquer le numéro de commande et le numéro de la facture correspondante. Ces
+                informations seront reportées dans le bon de retour préalablement établi.Toute marchandise renvoyée sans
+                l’accord écrit préalable de la Société ne pourra donner lieu à l’établissement d’un avoir et sera
+                retournée à l’expéditeur.<br />
+                Le retour des produits peut s’effectuer en colis recommandé avec accusé de réception à l’adresse de la
+                Société, aux frais et aux risques et périls du Client. Pour être acceptés les produits doivent encore
+                être au catalogue standard au moment du retour, être dans leur emballage d’origine, être reconnus en bon
+                état par la Société (non abimés, sans entaille) et accompagnés d’une copie de la facture ou du bon de
+                livraison d’origine. La marchandise facturée depuis trente jours (30) ou plus ne sera pas acceptée en
+                retour. Toute marchandise renvoyée doit être en parfait état pour remise en vente.Tout dispositif
+                médical livré stérile et non posé doit être retourné à la Société six mois avant sa date de péremption.
+                Toute marchandise détériorée ou déconditionnée ne pourra donner lieu à l’établissement d’un avoir. Le
+                retour d’articles n’étant plus fabriqués ou ayant été modifiés ou adaptés spécialement est
+                impossible. </p>
+            <p></p>
+            <p class="cgv-title"> Article n° 7 : CLAUSE DE RÉSERVE DE PROPRIÉTÉ </p>
+            <p> La Société se réserve la propriété de la marchandise livrée jusqu’au paiement intégral du prix
+                et en cas d’émission de chèques ou de prélèvement, jusqu’à leur encaissement.<br />
+                En cas de défaut de paiement, la Société peut revendiquer la restitution des produits ou de leur prix de
+                revente s’ils ont été revendus par le Client. Si le Client fait l’objet d’un redressement ou d’une
+                liquidation judiciaire, la Société se réserve le droit de revendiquer, dans le cadre de la procédure
+                collective, les marchandises vendues et restées impayées. </p>
+            <p class="cgv-title"> Article n° 8 : PRIX </p>
+            <p> Les prix des marchandises vendues sont ceux en vigueur à la date de la prise de commande. Tous
+                les prix sont indiqués en euros et ne comprennent pas la Taxe sur la Valeur Ajoutée laquelle sera
+                facturée en sus au taux en vigueur au moment de la commande.<br />
+                De même les frais de transport seront ajoutés au prix. Le Client se reportera au bon de commande pour
+                connaître les frais de port. La Société s’accorde le droit de modifier ses tarifs à tout moment, et
+                notamment de les adapter en cas de variation du taux de change, des taux applicables aux taxes, des
+                primes d’assurance, des coûts de fret et du prix d’achat. </p>
+            <p class="cgv-title"> Article n°9 : MODALITÉS DE PAIEMENT </p>
+            <p> Le moyen de paiement sera défini en fonction du produit et de l’échéancier de paiement choisi.
+                Les moyens et conditions de paiement sont les suivants :<br />
+                - Chèque, carte de crédit, carte Amex, virement : paiement 30 jours nets à compter de la date d’émission
+                de la facture,<br />
+                - Prélèvement : paiement 45 jours nets à compter de la date d’émission de la facture. Toute somme
+                impayée à son échéance portera de plein droit intérêt de retard, au taux de 3 % par mois sans préjudice
+                de toute autre indemnisation que la Société se réserve le droit de réclamer. Une indemnité forfaitaire
+                de 40 EUR sera due à la Société pour tout paiement intervenu après la date d’échéance conformément à la
+                loi n°2012- 387 du 22 mars 2012, sans préjudice du droit de réclamer une indemnité complémentaire si les
+                frais de recouvrement engagés par la Société devaient excéder ce montant (y compris les frais de
+                justice).<br />
+                Le retard se définit comme un paiement intervenu postérieurement à la date mentionnée sur la facture. La
+                Société se réserve le droit de suspendre toute commande d’un Client au sujet duquel il existerait un
+                litige relatif au paiement d’une commande antérieure.<br />
+                En cas de rejet du prélèvement bancaire, des pénalités d’un montant égal à trois fois le taux de
+                l’intérêt légal seront applicables de plein droit à compter de la notification du rejet de prélèvement.
+                Le taux de l’intérêt légal retenu est celui en vigueur au jour de la livraison des marchandises. Cette
+                pénalité est calculée sur le montant TTC de la somme restant due et court à compter de la date
+                d’échéance du prix sans qu’aucune mise en demeure préalable ne soit nécessaire. La Société se réserve le
+                droit de représenter au Client le moyen de paiement par prélèvement dans un délai de 10 jours à compter
+                du premier rejet. Si le rejet persiste, la Société pourra demander le règlement de la somme due par tout
+                autre moyen de paiement. </p>
+            <p class="cgv-title"> Article n°10 : RÉCLAMATIONS </p>
+            <p> Les marchandises envoyées Franco ou Port dû voyagent aux risques et périls du destinataire,
+                toutes réserves devant être prises vis-à-vis du transporteur à leur réception. Toute réclamation pour
+                livraison incomplète devra être faite dans les 7 jours suivant la réception des marchandises. Toute
+                réclamation concernant des marchandises endommagées devra être faite dans les 7 jours suivant la
+                réception des marchandises et devra être accompagnée d’un rapport détaillé destiné à la compagnie
+                d’assurances de la Société ou au transporteur. Toute réclamation non accompagnée d’un rapport ne sera
+                pas acceptée. La Société met à disposition de ses Clients un service après-vente joignable par téléphone
+                ou mail. Le contact est celui de l’administration des ventes qui accompagnera le Client auprès des
+                experts de la Société selon la typologie de la demande. </p>
+            <p class="cgv-title"> Article n°11 : GARANTIE </p>
+            <p> Les produits standards sont garantis pendant une période de 12 mois à compter de la date de
+                livraison par la Société contre tous défauts de fabrication. Les produits de distribution bénéficieront
+                d’une garantie spécifique conformément aux dispositions indiquées sur la facture. La Société se réserve
+                le droit de réparer ou remplacer tous produits selon ses conditions de garantie. La Société se décharge
+                de toute responsabilité quant aux produits renvoyés sans autorisation préalable. La Société n’est
+                autorisée à vendre ses Produits qu’à des professionnels de santé ou sous leur prescription. Le Client
+                assume l’entière responsabilité de l’usage qu’il fera des Produits, qu’il les utilise séparément ou
+                conjointement à d’autres matériels fabriqués ou non et/ou distribués ou non par la Société. La Société
+                préconise à l’utilisateur de ses produits d’avoir la formation adaptée pour les utiliser et de suivre le
+                protocole décrit dans les modes d’emploi et fiches techniques BIOTECH DENTAL. La Société ne saurait être
+                tenue responsable des conséquences directes ou indirectes de la mauvaise utilisation des produits vendus
+                par elle tant sur les personnes que sur les biens. Les Produits portant l’étiquette STERILE sont
+                garantis stériles sauf si leur emballage a été ouvert ou endommagé. La Société ne garantit ni
+                l’adéquation des Produits à un usage déterminé, ni les performances ou autres spécifications qui ne
+                seraient pas explicitement précisées au Contrat. Sont également exclues de toute garantie l’usure
+                normale des Produits, toute conséquence d’une négligence, d’un défaut de surveillance ou d’entretien,
+                d’une fausse manœuvre non imputable à la Société, d’une utilisation non conforme aux spécifications ou
+                d’une modification effectuée sans l’accord écrit de la Société. </p>
+            <p class="cgv-title"> Article n°12 : RESPONSABILITE </p>
+            <p> La Société décline toute responsabilité,expresse ou implicite,et ne serait être tenue
+                responsable de dommages directs ou indirects, résultant de ou en lien avec toute erreur de jugement ou
+                de pratique professionnelle dans le cadre de l’utilisation des produits.Aucun produit ni aucune
+                information diffusée par la Société ne peuvent se substituer aux services de professionnels de santé
+                expérimentés, ni à l’avis médical d’un praticien. La Société n’offre aucune assurance ni garantie pour
+                ses Produits concernant le traitement, l’action ou la médication.<br />
+                La Société recommande fortement à l’utilisateur de ses Produits d’avoir la formation officielle adéquate
+                pour les utiliser. Le Client assume tous les risques et toutes les responsabilités résultant de
+                l’utilisation de ces Produits, soit séparément, soit conjointement avec d’autres produits.<br />
+                La Société ne pourra être tenue responsable, à quelque titre que ce soit, des dommages matériels,
+                incorporels ou corporels, directs ou indirects, causés au Client, de quelle que nature qu’ils soient,
+                résultant de l’usage ou de la manipulation non-conforme des Produits objets des présentes. En tout état
+                de cause, la responsabilité de la Société sera expressément limitée au prix payé par le Client pour les
+                produits objets de la contestation.<br />
+                La Société se réserve le droit d’améliorer ses produits et donc de les modifier, sans préavis ni
+                obligations. </p>
+            <p class="cgv-title"> Article n°13 : PROPRIETE INTELLECTUELLE </p>
+            <p> Le Groupe BIOTECH DENTAL est propriétaire de ses marques déposées qui ne peuvent être
+                réutilisées sans son accord préalable. Le site BIOTECH DENTAL relève de la législation française et
+                internationale sur le droit d’auteur et la propriété intellectuelle. Tous les droits de reproduction
+                sont réservés, y compris pour les documents téléchargeables et les représentations iconographiques et
+                photographiques. Les visuels d’illustration du site sont la propriété de la Société. Les droits
+                d’utilisation, de reproduction et de diffusion sont strictement réservés à la Société. La reproduction,
+                la réutilisation et l’extraction de tout ou partie de la structure, et/ou du contenu de son site sur un
+                support quel qu’il soit est formellement interdite sauf autorisation expresse de la
+                Société. </p>
+            <p class="cgv-title"> Article n°14 : TRAITEMENT DES DONNEES PERSONNELLES
+            </p>
+            <p> Le responsable du traitement des données personnelles du Client est la Société.<br />
+                Les données personnelles du Client collectées et conservées par la Société dans le cadre de toute
+                commande ont un but unique de bonne gestion des commandes, des livraisons et factures. Les informations
+                qui sont demandées au Client sont nécessaires au traitement de sa commande. Elles sont destinées au
+                responsable du traitement, et à son personnel habilité. Elles pourront en outre être communiquées aux
+                partenaires contractuels de la Société intervenant dans le cadre de l’exécution de cette commande. Les
+                données sont conservées pendant la durée nécessaire au traitement effectué. Les données personnelles
+                collectées sur le Site Internet sont archivées 5 ans après la dernière utilisation du Site. Elles sont
+                conservées pendant la durée des relations contractuelles augmentée de 3 ans à des fins d’animation et
+                prospection, sans préjudice des obligations de conservation ou des délais de prescription.<br />
+                En matière de comptabilité, elles sont conservées 10 ans à compter de la clôture de l’exercice
+                comptable. La Société se réserve la possibilité d’utiliser à des fins commerciales les données
+                personnelles transmises par le Client. En vertu des articles 15 à 22 du Règlement Général sur la
+                Protection des données du 27 avril 2016, sous réserve de remplir les conditions fixées par ces articles,
+                les personnes dont les données sont traitées ont la faculté :<br />
+                - d’accéder à l’ensemble de leurs données personnelles,<br />
+                - de rectifier des données inexactes et/ou incomplètes,<br />
+                - d’obtenir l’effacement de leurs données.<br />
+                Sous réserve de justifier de son identité, et lorsque cela est techniquement possible, le Client a la
+                possibilité de demander la portabilité des données à caractère personnel qu’il a fournies. Le Client
+                peut également demander que les traitements fassent l’objet d’une limitation, et peut s’opposer, à tout
+                moment, au traitement de ses données pour des raisons tenant à sa situation personnelle.
+                Toutefois, le responsable peut ne pas faire droit à sa demande lorsqu’il démontre des motifs légitimes
+                et impérieux qui prévalent sur les intérêts et les droits et libertés du Client ou bien pour la
+                constatation, l’exercice ou la défense de ses droits en justice. Le responsable indique que ce droit
+                d’opposition peut également être exercé par le Client lorsque les données ne sont traitées qu’à des fins
+                de prospection. De plus, lorsque le traitement a pour base juridique unique le consentement donné par le
+                Client ce dernier peut à tout moment retirer celui-ci.<br />
+                Afin d’exercer ses droits, le Client doit rentrer en contact avec le responsable du traitement en
+                prenant soin de joindre un justificatif d’identité à sa demande, et en indiquant son adresse de courrier
+                électronique. Le responsable apporte à la collecte et au traitement des données une sécurité accrue en
+                prenant toutes les mesures nécessaires et raisonnables à la sécurisation et à la protection des données.
+                En cas de réclamation concernant le traitement des Données, le Client pourra s’adresser au Responsable
+                en le contactant aux coordonnées figurant dans la rubrique contact du site. Le responsable fera son
+                possible afin de proposer une solution raisonnable. En l’absence de réponse du responsable ou si le
+                conflit persiste malgré la proposition faite, le Client a la possibilité d’introduire une réclamation
+                auprès de la Commission Nationale de l’Informatique et des Libertés. </p>
+            <p class="cgv-title"> Article 15 : SOUS TRAITANCE </p>
+            <p> Dans le cadre de sa commande, le Client peut être amené à transmettre des données de santé à
+                la Société. Dans ce cas, cette dernière devient destinataire des données de santé, et sous-traitant de
+                ces données pour le compte du Client. Le Client demeure quant lui responsable du traitement de ces
+                données. Dans le cadre de leurs relations contractuelles, les parties s’engagent à respecter la
+                réglementation en vigueur applicable au traitement de données à caractère personnel et, en particulier,
+                le règlement (UE) 2016/679 du Parlement européen et du Conseil du 27 avril 2016 (ci-après, « le
+                règlement européen sur la protection des données » ou RGPD), la loi n° 78-17 du 6 janvier 1978 relative
+                à l’informatique, aux fichiers et aux libertés, ainsi que les dispositions du Code de la santé
+                publique.<br />
+                <br />
+                15.1 Description du traitement faisant l’objet de la sous-traitance<br /><br />
+                En sa qualité de sous-traitant, la Société est autorisée à traiter pour le compte du Client, responsable
+                de traitement, les données à caractère personnel nécessaires pour lui vendre les produits qu’il
+                commande. La Société utilisera les données personnelles communiquées par le Client afin de fabriquer le
+                produit commandé. La finalité du traitement est l’exécution de la commande du Client effectuée auprès de
+                la Société. Les données à caractère personnel, objet de la sous-traitance sont relatives au Client du
+                Client (le Client Final). Ces données sont les suivantes : Nom du patient, Numéro de Dossier, Données de
+                santé (SAV).
+                <br />
+                <br />
+                15.2 Obligations de la Société vis-à-vis du Client La Société s’engage à :<br /><br />
+                1. Traiter les données uniquement pour la seule finalité qui fait l’objet de la sous-traitance,<br />
+                2. Traiter les données conformément aux instructions documentées du responsable de traitement figurant
+                dans le présent contrat.<br />
+                Si le sous-traitant considère qu’une instruction constitue une violation du Règlement européen sur la
+                protection des données ou de toute autre disposition du droit de l’Union ou du droit des Etats membres
+                relative à la protection des données, il en informe immédiatement le responsable de traitement.<br />
+                En outre, si le sous-traitant est tenu de procéder à un transfert de données vers un pays tiers ou à une
+                organisation internationale, en vertu du droit de l’Union ou du droit de l’Etat membre auquel il est
+                soumis, il doit informer le responsable du traitement de cette obligation juridique avant le traitement,
+                sauf si le droit concerné interdit une telle information pour des motifs importants d’intérêt
+                public,<br />
+                3. Garantir la confidentialité des données à caractère personnel traitées dans le cadre du
+                présent contrat,<br />
+                4. Veiller à ce que les personnes autorisées à traiter les données à caractère personnel en vertu du
+                présent contrat :<br />
+                - S’engagent à respecter la confidentialité ou soient soumises à une obligation légale appropriée de
+                confidentialité,<br />
+                - Reçoivent la formation nécessaire en matière de protection des données à caractère personnel,<br />
+                5. Prendre en compte, s’agissant de ses outils, produits, applications ou services, les principes de
+                protection des données dès la conception et de protection des données par défaut.<br /><br />
+                15.3 Sous-traitance ultérieure<br /><br />
+                En sa qualité de sous-traitant, la Société peut faire appel à un autre sous-traitant (ci-après, « le
+                sous-traitant ultérieur ») pour mener des activités de traitement spécifiques.<br />
+                Dans ce cas, il demande l’autorisation préalable au Client, responsable de traitement.<br />
+                Le sous-traitant est autorisé à faire appel à des entités sous-traitantes (ci-après, le « sous-traitant
+                ultérieur ») pour mener certaines activités de traitement. En cas de recrutement d’autres sous-
+                traitants ultérieurs, le sous-traitant doit recueillir l’autorisation écrite, préalable et spécifique du
+                responsable de traitement. Le sous-traitant ultérieur est tenu de respecter les obligations du présent
+                contrat pour le compte et selon les instructions du responsable de traitement.<br />
+                Il appartient au sous-traitant initial de s’assurer que le sous-traitant ultérieur présente les mêmes
+                garanties suffisantes quant à la mise en œuvre de mesures techniques et organisationnelles appropriées
+                de manière à ce que le traitement réponde aux exigences du règlement européen sur la protection des
+                données. Si le sous-traitant ultérieur ne remplit pas ses obligations en matière de protection des
+                données, le sous-traitant initial demeure pleinement responsable devant le responsable de traitement de
+                l’exécution par l’autre sous- traitant de ses obligations.<br /><br />
+                15.4 Droit d’information des personnes concernées<br /><br />
+                Il appartient au Client, responsable de traitement de fournir l’information aux personnes concernées par
+                les opérations de traitement au moment de la collecte des données.<br /><br />
+                15.5 Exercice des droits des personnes<br /><br />
+                Dans la mesure du possible, en sa qualité de sous-traitant, la Société doit aider le Client responsable
+                de traitement à s’acquitter de son obligation de donner suite aux demandes d’exercice des droits des
+                personnes concernées : droit d’accès, de rectification, d’effacement et d’opposition, droit à la
+                limitation du traitement, droit à la portabilité des données, droit de ne pas faire l’objet d’une
+                décision individuelle automatisée (y compris le profilage). Lorsque les personnes concernées exercent
+                auprès de la Société des demandes d’exercice de leurs droits, la Société doit adresser ces demandes dès
+                réception par courrier électronique au Client.<br /><br />
+                15.6 Notification des violations de données à caractère personnel<br /><br />
+                La Société notifie au Client toute violation de données à caractère personnel dans un délai maximum de
+                48 heures après en avoir pris connaissance par mail et par téléphone. Cette notification est accompagnée
+                de toute documentation utile afin de permettre au Client responsable de traitement, si nécessaire, de
+                notifier cette violation à l’autorité de contrôle compétente. La notification contient :<br />
+                (a) La description de la nature de la violation de données à caractère personnel y compris, si possible,
+                les catégories et le nombre approximatif de personnes concernées par la violation et les catégories et
+                le nombre approximatif d’enregistrements de données à caractère personnel concernés ;<br />
+                (b) Le nom et les coordonnées du délégué à la protection des données ou d’un autre point de contact
+                auprès duquel des informations supplémentaires peuvent être obtenues ;<br />
+                (c) La description des conséquences probables de la violation de données à caractère personnel ;<br />
+                (d) La description des mesures prises ou que le responsable du traitement propose de prendre pour
+                remédier à la violation de données à caractère personnel, y compris, le cas échéant, les mesures pour en
+                atténuer les éventuelles conséquences négatives.<br /><br />
+                15.7 Aide du sous-traitant<br /><br />
+                En sa qualité de sous-traitant, la Société aide le responsable de traitement pour la réalisation
+                d’analyses d’impact relative à la protection des données. Le sous-traitant aide le responsable de
+                traitement pour la réalisation de la consultation préalable de l’autorité de contrôle.<br /><br />
+                15.8 Mesures de sécurité<br /><br />
+                En sa qualité de sous-traitant, la Société s’engage à mettre en œuvre les mesures de sécurité suivantes
+                :<br />
+                - La pseudonymisation et le chiffrement des données à caractère personnel ;<br />
+                - Les moyens permettant de garantir la confidentialité, l’intégrité, la disponibilité et la résilience
+                constantes des systèmes et des services de traitement ;<br />
+                - Les moyens permettant de rétablir la disponibilité des données à caractère personnel et l’accès à
+                celles-ci dans des délais appropriés en cas d’incident physique ou technique ;<br />
+                - Une procédure visant à tester, à analyser et à évaluer régulièrement l’efficacité des mesures
+                techniques et organisationnelles pour assurer la sécurité du traitement.<br />
+                La Société s’engage à mettre en œuvre les mesures de sécurité prévues par les référentiels ou les codes
+                de conduite auquel il est le cas échéant tenu, la certification ou l’agréement, dont il est, le cas
+                échéant titulaire.<br /><br />
+                15.9 Sort des données<br /><br />
+                Au terme du contrat principal de sous-traitance, la Société s’engage à :<br />
+                - À renvoyer toutes les données à caractère personnel au Client responsable de traitement ou, le cas
+                échéant,<br />
+                - À renvoyer les données à caractère personnel au sous-traitant désigné par le responsable de
+                traitement.<br />
+                Le renvoi doit s’accompagner de la destruction de toutes les copies existantes dans les systèmes
+                d’information du sous-traitant. Une fois détruites, la Société doit justifier par écrit de la
+                destruction.<br /><br />
+                15.10 Délégué à la protection des données<br /><br />
+                La Société communique au Client le nom et les coordonnées de son délégué à la protection des données :
+                David LELA LUZOLO - E-Mail : david.lela@secure4all.eu<br /><br />
+                15.11 Registre des catégories d’activités de traitement<br /><br />
+                La Société déclare tenir par écrit un registre de toutes les catégories d’activités de traitement
+                effectuées pour le compte du Client responsable de traitement comprenant :<br />
+                - Le nom et les coordonnées du responsable de traitement pour le compte duquel il agit, des éventuels
+                sous-traitants et, le cas échéant, du délégué à la protection des données ;<br />
+                - Les catégories de traitements effectués pour le compte du responsable du traitement ;<br />
+                - Le cas échéant, les transferts de données à caractère personnel vers un pays tiers ou à une
+                organisation internationale, y compris l’identification de ce pays tiers ou de cette organisation
+                internationale et, dans le cas des transferts visés à l’article 49, paragraphe 1, deuxième alinéa du
+                règlement européen sur la protection des données, les documents attestant de l’existence de garanties
+                appropriées ;<br />
+                - Dans la mesure du possible, une description générale des mesures de sécurité techniques et
+                organisationnelles, y compris entre autres, selon les besoins :<br />
+                - La pseudonymisation et le chiffrement des données à caractère personnel ;<br />
+                - Des moyens permettant de garantir la confidentialité, l’intégrité, la disponibilité et la résilience
+                constantes des systèmes et des services de traitement ;<br />
+                - Des moyens permettant de rétablir la disponibilité des données à caractère personnel et l’accès à
+                celles-ci dans des délais appropriés en cas d’incident physique ou technique ;<br />
+                - Une procédure visant à tester, à analyser et à évaluer régulièrement l’efficacité des mesures
+                techniques et organisationnelles pour assurer la sécurité du traitement.<br /><br />
+                15.12 Documentation<br /><br />
+                La Société met à la disposition du responsable de traitement la documentation nécessaire pour démontrer
+                le respect de toutes ses obligations et pour permettre la réalisation d’audits, y compris des
+                inspections, par le Client responsable du traitement ou un autre auditeur qu’il a mandaté, et contribuer
+                à ces audits.
+            </p>
+            <p class="cgv-title"> Article 16. OBLIGATIONS DU CLIENT VIS-A-VIS DE LA SOCIETE </p>
+            <p> Le Client s’engage à :<br />
+                1. Fournir au sous-traitant les données susvisées,<br />
+                2. Documenter par écrit toute instruction concernant le traitement des données par la Société,<br />
+                3. Veiller, au préalable et pendant toute la durée du traitement, au respect des obligations prévues par
+                le règlement européen sur la protection des données de la part du sous-traitant<br />
+                4. Superviser le traitement, y compris réaliser les audits et les inspections auprès de la
+                Société. </p>
+            <p class="cgv-title"> Article n°17 : RESOLUTION </p>
+            <p> Si dans les 15 jours qui suivent la mise en œuvre des stipulations susvisées relatives au
+                retard de paiement, le Client ne s’est pas acquitté des sommes restantes dues, la vente sera résolue de
+                plein droit et pourra ouvrir droit à l’allocation de dommages et intérêts au profit de la
+                Société. </p>
+            <p class="cgv-title"> Article n°18 : CESSION – SOUS-TRAITANCE </p>
+            <p> Le Client ne peut transférer tout ou partie de ses droits et obligations au titre du Contrat,
+                sans l’accord préalable et écrit de la Société.<br />
+                La Société se réserve le droit de céder, transférer ou apporter à un tiers, sous quelle que forme que ce
+                soit, les droits et obligations nés du Contrat sous réserve que ce tiers se substitue à la Société dans
+                leur exécution, et des dispositions susvisées relatives au traitement des données
+                personnelles. </p>
+            <p class="cgv-title"> Article n°19 : FORCE MAJEURE </p>
+            <p> La responsabilité de la Société ne pourra pas être mise en œuvre si la non-exécution ou le
+                retard dans l’exécution de l’une de ses obligations décrites dans les présentes conditions générales de
+                vente découle d’un cas de force majeure, au sens de la législation applicable. </p>
+            <p class="cgv-title"> Article n°20 : LOI APPLICABLE </p>
+            <p> Toutes les contestations relatives aux ventes de biens conclues par la Société ainsi qu’à
+                l’application ou à l’interprétation des présentes conditions générales de vente sont régies par la loi
+                française.
+                Tout litige fera l’objet au préalable d’une concertation afin de trouver une solution amiable, à défaut
+                la partie la plus diligente saisira le tribunal compétent. </p>
+            <p class="cgv-title"> Article n°21 : TRIBUNAL COMPÉTENT </p>
+            <p> A défaut de résolution amiable, le litige sera porte devant les juridictions du ressort de la
+                Société, et en particulier, du tribunal de commerce de Salon-de-Provence.<br />
+                Salon de Provence, le 23 décembre 2020. </p>
+        </div>
+        <script type="text/php">
+            if (isset($pdf)) {
+															        $text = "{PAGE_NUM} / {PAGE_COUNT}";
+															        $size = 7.5;
+															        $font = $fontMetrics->getFont("Arial");
+															        $width = $fontMetrics->get_text_width($text, $font, $size) / 2;
+															        $x = ($pdf->get_width() - $width) + 30;
+															        $y = $pdf->get_height() - 20;
+															        $pdf->page_text($x, $y, $text, $font, $size);
+															    }
+		</script>
+</body>
+
+</html>
