@@ -6,6 +6,8 @@ use App\Mail\AksRegistrationMailer;
 use App\Models\User;
 use App\Services\AuthService;
 use App\Services\Distributor\ClientSyncService;
+use App\Services\Galaxy\GalaxyApiClient;
+use App\Services\Galaxy\GalaxyApiException;
 use App\Services\GeneratePasswordService;
 use App\Traits\ApiResponser;
 use App\Traits\ConsumeExternalService;
@@ -459,6 +461,11 @@ class AuthController extends Controller
      */
     public function loginWithSso(Request $request)
     {
+        $galaxy = app(GalaxyApiClient::class);
+        if ($galaxy->isEnabled()) {
+            return $this->loginWithGalaxyCode($galaxy, $request);
+        }
+
         $token = $request->get('token');
 	
         try {
@@ -491,6 +498,16 @@ HKHc9LAa+CRIEBX1jQIDAQAB
      */
     function reverseLoginSSO(Request $request)
     {
+        $galaxy = app(GalaxyApiClient::class);
+        if ($galaxy->isEnabled()) {
+            try {
+                $tokens = $galaxy->passwordLogin((string) $request->get('email', ''), (string) $request->get('password', ''));
+                return $this->loginGalaxyUser($galaxy->me($tokens['access_token']));
+            } catch (GalaxyApiException $e) {
+                return $this->galaxyLoginError($e);
+            }
+        }
+
         //param required in the API call but don't know what for
         $url_reverse_login = $this->baseSSO . 'login/api?redirect_url=http://localhost:8000';
         $brokerToken = $this->authService->generateBrokerToken();
@@ -537,6 +554,57 @@ HKHc9LAa+CRIEBX1jQIDAQAB
         }
     }
 
+
+    public function galaxyLoginUrl()
+    {
+        $galaxy = app(GalaxyApiClient::class);
+        if (!$galaxy->isEnabled()) {
+            return response()->json(['success' => 0, 'message' => 'Galaxy API login is disabled'], 404);
+        }
+
+        return response()->json(['success' => 1, 'url' => $galaxy->authorizationUrl()]);
+    }
+
+    private function loginWithGalaxyCode(GalaxyApiClient $galaxy, Request $request)
+    {
+        $code = (string) $request->get('code', '');
+        $state = (string) $request->get('state', '');
+        if ($code === '' || $state === '') {
+            return response()->json(['success' => 0, 'message' => 'code and state are required'], 422);
+        }
+
+        try {
+            $tokens = $galaxy->exchangeAuthorizationCode($code, $state);
+            return $this->loginGalaxyUser($galaxy->me($tokens['access_token']));
+        } catch (GalaxyApiException $e) {
+            return $this->galaxyLoginError($e);
+        }
+    }
+
+    private function loginGalaxyUser(array $profile)
+    {
+        $email = (string) ($profile['email'] ?? '');
+        if ($email === '') {
+            return response()->json(['success' => 0, 'message' => 'Galaxy profile has no email'], 502);
+        }
+
+        if (!empty($profile['galaxyUuid'])) {
+            User::where('email', $email)
+                ->where(function ($query) {
+                    $query->whereNull('suid')->orWhere('suid', '');
+                })
+                ->update(['suid' => $profile['galaxyUuid']]);
+        }
+
+        $isUser = $this->login($email);
+        return $isUser ?: $this->register($email);
+    }
+
+    private function galaxyLoginError(GalaxyApiException $e)
+    {
+        $status = ($e->isUnauthorized() || $e->isNotFound()) ? 401 : 502;
+        return response()->json(['success' => 0, 'message' => $e->getMessage()], $status);
+    }
 
     /**
      * @return JsonResponse
