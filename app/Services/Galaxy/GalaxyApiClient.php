@@ -172,8 +172,10 @@ class GalaxyApiClient
         $message = is_array($body) && isset($body['message']) ? (string) $body['message'] : 'galaxy-api request failed';
         $status = is_array($body) && isset($body['statusCode']) ? (int) $body['statusCode'] : $response->status();
         $errors = is_array($body) && isset($body['errors']) && is_array($body['errors']) ? $body['errors'] : [];
+        $code = is_array($body) && isset($body['code']) && is_string($body['code']) ? $body['code'] : null;
+        $details = is_array($body) && isset($body['details']) && is_array($body['details']) ? $body['details'] : [];
 
-        throw new GalaxyApiException($message, $status, $errors);
+        throw GalaxyApiException::fromErrorBody($status, $message, $code, $errors, $details);
     }
 
     private function realmUrl(string $suffix): string

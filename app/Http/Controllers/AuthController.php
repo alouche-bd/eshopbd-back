@@ -8,6 +8,7 @@ use App\Services\AuthService;
 use App\Services\Distributor\ClientSyncService;
 use App\Services\Galaxy\GalaxyApiClient;
 use App\Services\Galaxy\GalaxyApiException;
+use App\Services\Galaxy\GalaxyPartnerAuthorizationException;
 use App\Services\GeneratePasswordService;
 use App\Traits\ApiResponser;
 use App\Traits\ConsumeExternalService;
@@ -16,6 +17,7 @@ use GuzzleHttp\Client;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
@@ -602,8 +604,29 @@ HKHc9LAa+CRIEBX1jQIDAQAB
 
     private function galaxyLoginError(GalaxyApiException $e)
     {
-        $status = ($e->isUnauthorized() || $e->isNotFound()) ? 401 : 502;
-        return response()->json(['success' => 0, 'message' => $e->getMessage()], $status);
+        if ($e instanceof GalaxyPartnerAuthorizationException) {
+            Log::error('Galaxy partner client refused', array_filter([
+                'status' => $e->getStatusCode(),
+                'code' => $e->getErrorCode(),
+                'missingScopes' => $e->missingScopes(),
+                'error' => $e->getMessage(),
+            ]));
+            return response()->json([
+                'success' => 0,
+                'code' => $e->isClientUnknown() ? 'GALAXY_PARTNER_CLIENT_UNKNOWN' : 'GALAXY_PARTNER_SCOPE_DENIED',
+                'message' => $e->getMessage(),
+            ], 502);
+        }
+
+        if ($e->isUserInactive()) {
+            return response()->json(['success' => 0, 'code' => 'GALAXY_USER_INACTIVE', 'message' => $e->getMessage()], 403);
+        }
+
+        if ($e->isUnauthorized() || $e->isNotFound()) {
+            return response()->json(['success' => 0, 'code' => 'GALAXY_INVALID_CREDENTIALS', 'message' => $e->getMessage()], 401);
+        }
+
+        return response()->json(['success' => 0, 'message' => $e->getMessage()], 502);
     }
 
     /**

@@ -71,4 +71,31 @@ class GalaxyLoginUrlRouteTest extends TestCase
         $this->seeStatusCode(401);
         $this->seeJson(['success' => 0]);
     }
+
+    public function testUnregisteredPartnerClientIsNotReportedAsBadCredentials()
+    {
+        config(['services.galaxy_api' => [
+            'enabled' => true,
+            'base_url' => 'https://galaxy.test',
+            'keycloak_url' => 'https://kc.test/auth',
+            'keycloak_realm' => 's4a',
+            'keycloak_client_id' => 'biotech-dental-eshop',
+            'keycloak_client_secret' => 'shh',
+        ]]);
+        Http::fake([
+            'https://kc.test/*' => Http::response(['access_token' => 'user-token', 'expires_in' => 300]),
+            'https://galaxy.test/*' => Http::response([
+                'status' => false,
+                'statusCode' => 403,
+                'message' => 'This client is not registered as a partner',
+                'code' => 'PARTNER_CLIENT_UNKNOWN',
+                'timestamp' => '2026-11-16T10:00:00.000Z',
+            ], 403),
+        ]);
+
+        $this->post('/api/reverse-login-sso', ['email' => 'dr@example.com', 'password' => 'right']);
+
+        $this->seeStatusCode(502);
+        $this->seeJson(['success' => 0, 'code' => 'GALAXY_PARTNER_CLIENT_UNKNOWN']);
+    }
 }

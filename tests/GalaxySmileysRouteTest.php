@@ -83,4 +83,35 @@ class GalaxySmileysRouteTest extends TestCase
 
         $this->seeStatusCode(502);
     }
+
+    public function testMissingPartnerScopeIsABadGatewayWithItsCode()
+    {
+        $this->fakeGalaxy([
+            'status' => false,
+            'statusCode' => 403,
+            'message' => 'Missing partner scope: smileys:read',
+            'code' => 'PARTNER_SCOPE_DENIED',
+            'details' => ['missing' => ['smileys:read']],
+        ], 403);
+
+        $this->get('/api/middleware/getSmileys/' . self::UUID . '?salesforceAccountId=001G500001JW73MIAT');
+
+        $this->seeStatusCode(502);
+        $this->seeJson(['success' => 0, 'code' => 'GALAXY_PARTNER_SCOPE_DENIED']);
+    }
+
+    public function testAccountErrorsKeepTheirGalaxyCode()
+    {
+        $this->fakeGalaxy([
+            'status' => false,
+            'statusCode' => 403,
+            'message' => 'The user is not an active contact of this Salesforce account',
+            'code' => 'ACCOUNT_NOT_MEMBER',
+        ], 403);
+
+        $this->get('/api/middleware/getSmileys/' . self::UUID . '?salesforceAccountId=001G500001JW73MIAT');
+
+        $this->seeStatusCode(200);
+        $this->seeJson(['success' => 0, 'code' => 'GALAXY_ACCOUNT_NOT_MEMBER']);
+    }
 }
