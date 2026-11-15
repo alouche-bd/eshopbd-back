@@ -1,5 +1,7 @@
 # Lumen PHP Framework
 
+> Intégration Galaxy : voir [docs/galaxy-api-migration.md](docs/galaxy-api-migration.md) (nouvelles routes galaxy-api, Keycloak `s4a`, script `scripts/setup-galaxy-api.sh`).
+
 [![Build Status](https://travis-ci.org/laravel/lumen-framework.svg)](https://travis-ci.org/laravel/lumen-framework)
 [![Total Downloads](https://img.shields.io/packagist/dt/laravel/framework)](https://packagist.org/packages/laravel/lumen-framework)
 [![Latest Stable Version](https://img.shields.io/packagist/v/laravel/framework)](https://packagist.org/packages/laravel/lumen-framework)
