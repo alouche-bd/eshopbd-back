@@ -226,7 +226,7 @@ if [[ -n "${CHECK_UUID}" && -n "${ACCESS_TOKEN}" ]]; then
   if [[ "$(printf '%s' "${BALANCE}" | json_field status)" == "true" ]]; then
     record OK "smiley balance of ${CHECK_UUID}: $(printf '%s' "${BALANCE}" | json_field result.balance)"
   else
-    record KO "smiley balance of ${CHECK_UUID}: $(printf '%s' "${BALANCE}" | json_field statusCode) $(printf '%s' "${BALANCE}" | json_field message)"
+    record KO "smiley balance of ${CHECK_UUID}: $(printf '%s' "${BALANCE}" | json_field statusCode) $(printf '%s' "${BALANCE}" | json_field code) $(printf '%s' "${BALANCE}" | json_field message)"
   fi
 fi
 

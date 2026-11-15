@@ -1,0 +1,179 @@
+{
+  "source": {
+    "repository": "galaxy-api",
+    "commit": "6e6fc05",
+    "schemas": "openapi-eshop.json (components.schemas of the document generated with npm run doc:postman)",
+    "envelopes": "src/common/interceptors/response.interceptor.ts, src/common/filters/global-exception.filter.ts",
+    "errors": "src/common/guards/partner-client.guard.ts, src/common/salesforce/salesforce-membership.lookup.ts, src/modules/users/partner-user.directory.ts"
+  },
+  "me": {
+    "status": 200,
+    "schema": "PartnerUserDto",
+    "body": {
+      "status": true,
+      "statusCode": 200,
+      "result": {
+        "galaxyUuid": "6f1c2a34-1b2c-4d5e-8f90-123456789abc",
+        "email": "dr.martin@example.test",
+        "firstName": "Claire",
+        "lastName": "Martin",
+        "role": "PRACTITIONER",
+        "language": "fr",
+        "billingCountry": "FR",
+        "isActive": true
+      },
+      "timestamp": "2026-11-16T10:00:00.000Z"
+    }
+  },
+  "meWithoutBillingCountry": {
+    "status": 200,
+    "schema": "PartnerUserDto",
+    "body": {
+      "status": true,
+      "statusCode": 200,
+      "result": {
+        "galaxyUuid": "6f1c2a34-1b2c-4d5e-8f90-123456789abc",
+        "email": "lab@example.test",
+        "firstName": "Paul",
+        "lastName": "Lefort",
+        "role": "LAB",
+        "language": "en",
+        "billingCountry": null,
+        "isActive": true
+      },
+      "timestamp": "2026-11-16T10:00:00.000Z"
+    }
+  },
+  "balance": {
+    "status": 200,
+    "schema": "EshopSmileyBalanceDto",
+    "body": {
+      "status": true,
+      "statusCode": 200,
+      "result": {
+        "galaxyUuid": "6f1c2a34-1b2c-4d5e-8f90-123456789abc",
+        "salesforceAccountId": "001G500001JW73MIAT",
+        "salesforceContactId": "003G500001ABCDEFGH",
+        "balance": 750
+      },
+      "timestamp": "2026-11-16T10:00:00.000Z"
+    }
+  },
+  "debit": {
+    "status": 201,
+    "schema": "EshopSmileyDebitResponseDto",
+    "body": {
+      "status": true,
+      "statusCode": 201,
+      "result": {
+        "galaxyUuid": "6f1c2a34-1b2c-4d5e-8f90-123456789abc",
+        "salesforceAccountId": "001G500001JW73MIAT",
+        "salesforceContactId": "003G500001ABCDEFGH",
+        "balance": 250,
+        "transactionUuid": "0b5f8a52-7c1e-4a8e-9d4b-1f2e3d4c5b6a",
+        "amount": 500,
+        "reference": "CART-42",
+        "replayed": false
+      },
+      "timestamp": "2026-11-16T10:00:00.000Z"
+    }
+  },
+  "unauthenticated": {
+    "status": 401,
+    "body": {
+      "status": false,
+      "statusCode": 401,
+      "message": "Unauthorized",
+      "code": "UNAUTHENTICATED",
+      "timestamp": "2026-11-16T10:00:00.000Z"
+    }
+  },
+  "partnerClientUnknown": {
+    "status": 403,
+    "body": {
+      "status": false,
+      "statusCode": 403,
+      "message": "This client is not registered as a partner",
+      "code": "PARTNER_CLIENT_UNKNOWN",
+      "timestamp": "2026-11-16T10:00:00.000Z"
+    }
+  },
+  "partnerScopeDenied": {
+    "status": 403,
+    "body": {
+      "status": false,
+      "statusCode": 403,
+      "message": "Missing partner scope: smileys:read",
+      "code": "PARTNER_SCOPE_DENIED",
+      "details": {
+        "missing": [
+          "smileys:read"
+        ]
+      },
+      "timestamp": "2026-11-16T10:00:00.000Z"
+    }
+  },
+  "partnerTokenUserOnly": {
+    "status": 403,
+    "body": {
+      "status": false,
+      "statusCode": 403,
+      "message": "This client may only act for the user who signed the token",
+      "code": "PARTNER_SCOPE_DENIED",
+      "timestamp": "2026-11-16T10:00:00.000Z"
+    }
+  },
+  "accountAmbiguous": {
+    "status": 409,
+    "body": {
+      "status": false,
+      "statusCode": 409,
+      "message": "The user belongs to several Salesforce accounts; pass salesforceAccountId",
+      "code": "ACCOUNT_AMBIGUOUS",
+      "details": {
+        "accounts": 2
+      },
+      "timestamp": "2026-11-16T10:00:00.000Z"
+    }
+  },
+  "accountNotMember": {
+    "status": 403,
+    "body": {
+      "status": false,
+      "statusCode": 403,
+      "message": "The user is not an active contact of this Salesforce account",
+      "code": "ACCOUNT_NOT_MEMBER",
+      "timestamp": "2026-11-16T10:00:00.000Z"
+    }
+  },
+  "userNotFound": {
+    "status": 404,
+    "body": {
+      "status": false,
+      "statusCode": 404,
+      "message": "User not found",
+      "code": "PARTNER_USER_NOT_FOUND",
+      "timestamp": "2026-11-16T10:00:00.000Z"
+    }
+  },
+  "userInactive": {
+    "status": 403,
+    "body": {
+      "status": false,
+      "statusCode": 403,
+      "message": "User account is not activated",
+      "code": "PARTNER_USER_INACTIVE",
+      "timestamp": "2026-11-16T10:00:00.000Z"
+    }
+  },
+  "salesforceUnavailable": {
+    "status": 503,
+    "body": {
+      "status": false,
+      "statusCode": 503,
+      "message": "Salesforce memberships are temporarily unavailable",
+      "code": "SALESFORCE_UNAVAILABLE",
+      "timestamp": "2026-11-16T10:00:00.000Z"
+    }
+  }
+}

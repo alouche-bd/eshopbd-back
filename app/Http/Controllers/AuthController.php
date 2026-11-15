@@ -9,6 +9,7 @@ use App\Services\Distributor\ClientSyncService;
 use App\Services\Galaxy\GalaxyApiClient;
 use App\Services\Galaxy\GalaxyApiException;
 use App\Services\Galaxy\GalaxyPartnerAuthorizationException;
+use App\Services\Galaxy\GalaxyPartnerUser;
 use App\Services\GeneratePasswordService;
 use App\Traits\ApiResponser;
 use App\Traits\ConsumeExternalService;
@@ -583,23 +584,20 @@ HKHc9LAa+CRIEBX1jQIDAQAB
         }
     }
 
-    private function loginGalaxyUser(array $profile)
+    private function loginGalaxyUser(GalaxyPartnerUser $profile)
     {
-        $email = (string) ($profile['email'] ?? '');
-        if ($email === '') {
-            return response()->json(['success' => 0, 'message' => 'Galaxy profile has no email'], 502);
+        if (!$profile->isActive) {
+            return response()->json(['success' => 0, 'code' => 'GALAXY_USER_INACTIVE', 'message' => 'Galaxy user is not active'], 403);
         }
 
-        if (!empty($profile['galaxyUuid'])) {
-            User::where('email', $email)
-                ->where(function ($query) {
-                    $query->whereNull('suid')->orWhere('suid', '');
-                })
-                ->update(['suid' => $profile['galaxyUuid']]);
-        }
+        User::where('email', $profile->email)
+            ->where(function ($query) {
+                $query->whereNull('suid')->orWhere('suid', '');
+            })
+            ->update(['suid' => $profile->galaxyUuid]);
 
-        $isUser = $this->login($email);
-        return $isUser ?: $this->register($email);
+        $isUser = $this->login($profile->email);
+        return $isUser ?: $this->register($profile->email);
     }
 
     private function galaxyLoginError(GalaxyApiException $e)

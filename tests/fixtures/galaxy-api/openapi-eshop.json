@@ -1,0 +1,290 @@
+{
+  "source": {
+    "repository": "galaxy-api",
+    "commit": "6e6fc05",
+    "command": "npm run doc:postman",
+    "document": "galaxy-api-openapi-6e6fc05.json",
+    "envelopes": "src/common/interceptors/response.interceptor.ts, src/common/filters/global-exception.filter.ts"
+  },
+  "paths": {
+    "/integrations/eshop/me": {
+      "get": {
+        "operationId": "EshopController_me",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PartnerUserDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid Keycloak token"
+          },
+          "403": {
+            "description": "Client not registered in partner_client, missing scope, or user not allowed"
+          }
+        },
+        "security": [
+          {
+            "keycloak-access-token": []
+          }
+        ],
+        "summary": "Resolve the Galaxy user behind a Keycloak user token issued to the e-shop",
+        "tags": [
+          "E-shop (integration)"
+        ]
+      }
+    },
+    "/integrations/eshop/users/{galaxyUuid}/smileys/balance": {
+      "get": {
+        "operationId": "EshopController_balance",
+        "parameters": [
+          {
+            "name": "galaxyUuid",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "salesforceAccountId",
+            "required": false,
+            "in": "query",
+            "description": "Salesforce account the balance is siloed on. Optional when the user belongs to a single account.",
+            "schema": {
+              "example": "001G500001JW73MIAT",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EshopSmileyBalanceDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid Keycloak token"
+          },
+          "403": {
+            "description": "Client not registered in partner_client, missing scope, or user not allowed"
+          }
+        },
+        "security": [
+          {
+            "keycloak-access-token": []
+          }
+        ],
+        "summary": "Spendable smiley balance of a user on one account",
+        "tags": [
+          "E-shop (integration)"
+        ]
+      }
+    },
+    "/integrations/eshop/users/{galaxyUuid}/smileys/debits": {
+      "post": {
+        "operationId": "EshopController_debit",
+        "parameters": [
+          {
+            "name": "galaxyUuid",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EshopSmileyDebitDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EshopSmileyDebitResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid Keycloak token"
+          },
+          "403": {
+            "description": "Client not registered in partner_client, missing scope, or user not allowed"
+          }
+        },
+        "security": [
+          {
+            "keycloak-access-token": []
+          }
+        ],
+        "summary": "Debit smileys for an e-shop order (idempotent on reference)",
+        "tags": [
+          "E-shop (integration)"
+        ]
+      }
+    }
+  },
+  "schemas": {
+    "PartnerUserDto": {
+      "type": "object",
+      "properties": {
+        "galaxyUuid": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "email": {
+          "type": "string"
+        },
+        "firstName": {
+          "type": "string"
+        },
+        "lastName": {
+          "type": "string"
+        },
+        "role": {
+          "type": "string",
+          "enum": [
+            "PRACTITIONER",
+            "LAB",
+            "PATIENT",
+            "MARKETING",
+            "SUPER_ADMIN",
+            "ADV",
+            "REGULATORY_AFFAIRS"
+          ]
+        },
+        "language": {
+          "type": "string"
+        },
+        "billingCountry": {
+          "type": "string",
+          "nullable": true
+        },
+        "isActive": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "galaxyUuid",
+        "email",
+        "firstName",
+        "lastName",
+        "role",
+        "language",
+        "billingCountry",
+        "isActive"
+      ]
+    },
+    "EshopSmileyBalanceDto": {
+      "type": "object",
+      "properties": {
+        "galaxyUuid": {
+          "type": "string"
+        },
+        "salesforceAccountId": {
+          "type": "string"
+        },
+        "salesforceContactId": {
+          "type": "string"
+        },
+        "balance": {
+          "type": "number",
+          "description": "Spendable whole smileys"
+        }
+      },
+      "required": [
+        "galaxyUuid",
+        "salesforceAccountId",
+        "salesforceContactId",
+        "balance"
+      ]
+    },
+    "EshopSmileyDebitDto": {
+      "type": "object",
+      "properties": {
+        "salesforceAccountId": {
+          "type": "string",
+          "description": "Salesforce account the balance is siloed on. Optional when the user belongs to a single account.",
+          "example": "001G500001JW73MIAT"
+        },
+        "amount": {
+          "type": "number",
+          "description": "Whole smileys to debit (1 smiley = 1 EUR)",
+          "example": 500
+        },
+        "reference": {
+          "type": "string",
+          "description": "E-shop order reference. A replay with the same reference returns the original debit.",
+          "example": "ESHOP-8f3a"
+        }
+      },
+      "required": [
+        "amount",
+        "reference"
+      ]
+    },
+    "EshopSmileyDebitResponseDto": {
+      "type": "object",
+      "properties": {
+        "galaxyUuid": {
+          "type": "string"
+        },
+        "salesforceAccountId": {
+          "type": "string"
+        },
+        "salesforceContactId": {
+          "type": "string"
+        },
+        "balance": {
+          "type": "number",
+          "description": "Spendable whole smileys"
+        },
+        "transactionUuid": {
+          "type": "string"
+        },
+        "amount": {
+          "type": "number",
+          "description": "Debited whole smileys"
+        },
+        "reference": {
+          "type": "string"
+        },
+        "replayed": {
+          "type": "boolean",
+          "description": "True when the reference had already been debited"
+        }
+      },
+      "required": [
+        "galaxyUuid",
+        "salesforceAccountId",
+        "salesforceContactId",
+        "balance",
+        "transactionUuid",
+        "amount",
+        "reference",
+        "replayed"
+      ]
+    }
+  }
+}

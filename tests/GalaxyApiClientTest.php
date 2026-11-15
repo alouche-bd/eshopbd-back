@@ -180,12 +180,18 @@ class GalaxyApiClientTest extends TestCase
             'https://galaxy.test/integrations/eshop/me' => Http::response($this->envelope([
                 'galaxyUuid' => self::UUID,
                 'email' => 'dr@example.com',
+                'firstName' => 'Claire',
+                'lastName' => 'Martin',
+                'role' => 'PRACTITIONER',
+                'language' => 'fr',
+                'billingCountry' => 'FR',
+                'isActive' => true,
             ])),
         ]);
 
         $profile = $this->client()->me('user-token');
 
-        $this->assertSame('dr@example.com', $profile['email']);
+        $this->assertSame('dr@example.com', $profile->email);
         Http::assertSent(fn (Request $request) => $request->hasHeader('Authorization', 'Bearer user-token'));
     }
 

@@ -85,24 +85,24 @@ class GalaxyApiClient
         ]);
     }
 
-    public function me(string $userAccessToken): array
+    public function me(string $userAccessToken): GalaxyPartnerUser
     {
-        return $this->call('GET', 'integrations/eshop/me', $userAccessToken);
+        return GalaxyPartnerUser::fromArray($this->call('GET', 'integrations/eshop/me', $userAccessToken));
     }
 
     public function smileyBalance(string $galaxyUuid, ?string $salesforceAccountId = null): array
     {
-        return $this->call(
+        return $this->requireFields($this->call(
             'GET',
             'integrations/eshop/users/' . rawurlencode($galaxyUuid) . '/smileys/balance',
             $this->serviceToken(),
             ['query' => array_filter(['salesforceAccountId' => $salesforceAccountId])]
-        );
+        ), ['salesforceAccountId', 'balance'], 'EshopSmileyBalanceDto');
     }
 
     public function debitSmileys(string $galaxyUuid, int $amount, string $reference, ?string $salesforceAccountId = null): array
     {
-        return $this->call(
+        return $this->requireFields($this->call(
             'POST',
             'integrations/eshop/users/' . rawurlencode($galaxyUuid) . '/smileys/debits',
             $this->serviceToken(),
@@ -111,7 +111,7 @@ class GalaxyApiClient
                 'reference' => $reference,
                 'salesforceAccountId' => $salesforceAccountId,
             ], fn ($value) => $value !== null && $value !== '')]
-        );
+        ), ['transactionUuid', 'amount', 'balance', 'replayed'], 'EshopSmileyDebitResponseDto');
     }
 
     public function health(): array
@@ -176,6 +176,17 @@ class GalaxyApiClient
         $details = is_array($body) && isset($body['details']) && is_array($body['details']) ? $body['details'] : [];
 
         throw GalaxyApiException::fromErrorBody($status, $message, $code, $errors, $details);
+    }
+
+    private function requireFields(array $result, array $fields, string $schema): array
+    {
+        foreach ($fields as $field) {
+            if (!array_key_exists($field, $result) || $result[$field] === null) {
+                throw new GalaxyApiException('galaxy-api ' . $schema . ' has no ' . $field, 502);
+            }
+        }
+
+        return $result;
     }
 
     private function realmUrl(string $suffix): string
