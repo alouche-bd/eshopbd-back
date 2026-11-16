@@ -6,6 +6,10 @@ use App\Mail\AksRegistrationMailer;
 use App\Models\User;
 use App\Services\AuthService;
 use App\Services\Distributor\ClientSyncService;
+use App\Services\Galaxy\GalaxyApiClient;
+use App\Services\Galaxy\GalaxyApiException;
+use App\Services\Galaxy\GalaxyPartnerAuthorizationException;
+use App\Services\Galaxy\GalaxyPartnerUser;
 use App\Services\GeneratePasswordService;
 use App\Traits\ApiResponser;
 use App\Traits\ConsumeExternalService;
@@ -14,6 +18,7 @@ use GuzzleHttp\Client;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
@@ -459,6 +464,11 @@ class AuthController extends Controller
      */
     public function loginWithSso(Request $request)
     {
+        $galaxy = app(GalaxyApiClient::class);
+        if ($galaxy->isNewMode()) {
+            return $this->loginWithGalaxyCode($galaxy, $request);
+        }
+
         $token = $request->get('token');
 	
         try {
@@ -491,6 +501,16 @@ HKHc9LAa+CRIEBX1jQIDAQAB
      */
     function reverseLoginSSO(Request $request)
     {
+        $galaxy = app(GalaxyApiClient::class);
+        if ($galaxy->isNewMode()) {
+            try {
+                $tokens = $galaxy->passwordLogin((string) $request->get('email', ''), (string) $request->get('password', ''));
+                return $this->loginGalaxyUser($galaxy->me($tokens['access_token']));
+            } catch (GalaxyApiException $e) {
+                return $this->galaxyLoginError($e);
+            }
+        }
+
         //param required in the API call but don't know what for
         $url_reverse_login = $this->baseSSO . 'login/api?redirect_url=http://localhost:8000';
         $brokerToken = $this->authService->generateBrokerToken();
@@ -537,6 +557,75 @@ HKHc9LAa+CRIEBX1jQIDAQAB
         }
     }
 
+
+    public function galaxyLoginUrl()
+    {
+        $galaxy = app(GalaxyApiClient::class);
+        if (!$galaxy->isNewMode()) {
+            return response()->json(['success' => 0, 'message' => 'Galaxy API login is disabled'], 404);
+        }
+
+        return response()->json(['success' => 1, 'url' => $galaxy->authorizationUrl()]);
+    }
+
+    private function loginWithGalaxyCode(GalaxyApiClient $galaxy, Request $request)
+    {
+        $code = (string) $request->get('code', '');
+        $state = (string) $request->get('state', '');
+        if ($code === '' || $state === '') {
+            return response()->json(['success' => 0, 'message' => 'code and state are required'], 422);
+        }
+
+        try {
+            $tokens = $galaxy->exchangeAuthorizationCode($code, $state);
+            return $this->loginGalaxyUser($galaxy->me($tokens['access_token']));
+        } catch (GalaxyApiException $e) {
+            return $this->galaxyLoginError($e);
+        }
+    }
+
+    private function loginGalaxyUser(GalaxyPartnerUser $profile)
+    {
+        if (!$profile->isActive) {
+            return response()->json(['success' => 0, 'code' => 'GALAXY_USER_INACTIVE', 'message' => 'Galaxy user is not active'], 403);
+        }
+
+        User::where('email', $profile->email)
+            ->where(function ($query) {
+                $query->whereNull('suid')->orWhere('suid', '');
+            })
+            ->update(['suid' => $profile->galaxyUuid]);
+
+        $isUser = $this->login($profile->email);
+        return $isUser ?: $this->register($profile->email);
+    }
+
+    private function galaxyLoginError(GalaxyApiException $e)
+    {
+        if ($e instanceof GalaxyPartnerAuthorizationException) {
+            Log::error('Galaxy partner client refused', array_filter([
+                'status' => $e->getStatusCode(),
+                'code' => $e->getErrorCode(),
+                'missingScopes' => $e->missingScopes(),
+                'error' => $e->getMessage(),
+            ]));
+            return response()->json([
+                'success' => 0,
+                'code' => $e->isClientUnknown() ? 'GALAXY_PARTNER_CLIENT_UNKNOWN' : 'GALAXY_PARTNER_SCOPE_DENIED',
+                'message' => $e->getMessage(),
+            ], 502);
+        }
+
+        if ($e->isUserInactive()) {
+            return response()->json(['success' => 0, 'code' => 'GALAXY_USER_INACTIVE', 'message' => $e->getMessage()], 403);
+        }
+
+        if ($e->isUnauthorized() || $e->isNotFound()) {
+            return response()->json(['success' => 0, 'code' => 'GALAXY_INVALID_CREDENTIALS', 'message' => $e->getMessage()], 401);
+        }
+
+        return response()->json(['success' => 0, 'message' => $e->getMessage()], 502);
+    }
 
     /**
      * @return JsonResponse

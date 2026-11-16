@@ -97,6 +97,7 @@ $router->group(['prefix' => 'api'], function () use ($router) {
     $router->post('/login', 'AuthController@login');
     $router->post('/login-admin', 'AuthController@loginAdmin');
     $router->post('/login-sso', 'AuthController@loginWithSso');
+    $router->get('/galaxy/login-url', 'AuthController@galaxyLoginUrl');
     $router->post('/register-admin', 'AuthController@registerAdmin');
     $router->post('/check-email', 'AuthController@checkEmail');
     $router->post('/register', 'AuthController@register');

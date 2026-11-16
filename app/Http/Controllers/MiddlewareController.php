@@ -2,6 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\Galaxy\GalaxyApiClient;
+use App\Services\Galaxy\GalaxyAccountAmbiguousException;
+use App\Services\Galaxy\GalaxyApiException;
+use App\Services\Galaxy\GalaxyPartnerAuthorizationException;
 use App\Traits\ApiResponser;
 use App\Traits\ConsumeExternalService;
 use Barryvdh\DomPDF\Facade as PDF;
@@ -12,6 +16,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class MiddlewareController extends Controller
 {
@@ -319,7 +324,10 @@ class MiddlewareController extends Controller
 
             $response = $promise->wait();
 
-            if ($request->get('smileyamount') > 0) {
+            $galaxy = app(GalaxyApiClient::class);
+            if ($request->get('smileyamount') > 0 && $galaxy->isNewMode()) {
+                $this->debitGalaxySmileys($galaxy, $request);
+            } elseif ($request->get('smileyamount') > 0) {
                 $params = [
 
                     "act" => "debit",
@@ -888,8 +896,12 @@ class MiddlewareController extends Controller
      * @return JsonResponse
      */
     public
-    function getSmileys($uuid)
+    function getSmileys(Request $request, $uuid)
     {
+        $galaxy = app(GalaxyApiClient::class);
+        if ($galaxy->isNewMode()) {
+            return $this->getGalaxySmileys($galaxy, $uuid, $request->query('salesforceAccountId'));
+        }
 
         try {
             $url = $this->baseS4A . 'smileys/total/' . $uuid;
@@ -899,6 +911,84 @@ class MiddlewareController extends Controller
             return $promise->getBody()->getContents();
         } catch (Exception $e) {
             return $this->errorResponse('Quelque chose s\'est mal passé.', Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    private function getGalaxySmileys(GalaxyApiClient $galaxy, string $uuid, ?string $salesforceAccountId)
+    {
+        try {
+            $balance = $galaxy->smileyBalance($uuid, $salesforceAccountId ?: null);
+            return response()->json([
+                'success' => 1,
+                'result' => (int) $balance['balance'],
+                'salesforceAccountId' => $balance['salesforceAccountId'] ?? null,
+            ]);
+        } catch (GalaxyPartnerAuthorizationException $e) {
+            Log::error('Galaxy partner client refused', $this->galaxyLogContext($e, ['uuid' => $uuid]));
+            return response()->json([
+                'success' => 0,
+                'code' => $e->isClientUnknown() ? 'GALAXY_PARTNER_CLIENT_UNKNOWN' : 'GALAXY_PARTNER_SCOPE_DENIED',
+                'message' => $e->getMessage(),
+            ], Response::HTTP_BAD_GATEWAY);
+        } catch (GalaxyApiException $e) {
+            $code = $this->galaxySmileysUnavailableCode($e);
+            if ($code !== null) {
+                return response()->json(array_filter([
+                    'success' => 0,
+                    'code' => $code,
+                    'message' => $e->getMessage(),
+                    'accounts' => $e instanceof GalaxyAccountAmbiguousException ? $e->accountCount() : null,
+                ], fn ($value) => $value !== null));
+            }
+            Log::error('Galaxy smiley balance failed', $this->galaxyLogContext($e, ['uuid' => $uuid]));
+            return $this->errorResponse('Quelque chose s\'est mal passé.', Response::HTTP_BAD_GATEWAY);
+        }
+    }
+
+    private function galaxySmileysUnavailableCode(GalaxyApiException $e): ?string
+    {
+        if ($e->isAccountAmbiguous()) {
+            return 'GALAXY_ACCOUNT_AMBIGUOUS';
+        }
+        if ($e->isAccountNotMember()) {
+            return 'GALAXY_ACCOUNT_NOT_MEMBER';
+        }
+        if ($e->isUserInactive()) {
+            return 'GALAXY_USER_INACTIVE';
+        }
+        if ($e->isNotFound()) {
+            return 'GALAXY_USER_NOT_FOUND';
+        }
+        if ($e->isConflict() || $e->getStatusCode() === 403) {
+            return 'GALAXY_ACCOUNT_UNAVAILABLE';
+        }
+
+        return null;
+    }
+
+    private function galaxyLogContext(GalaxyApiException $e, array $context): array
+    {
+        return $context + array_filter([
+            'status' => $e->getStatusCode(),
+            'code' => $e->getErrorCode(),
+            'missingScopes' => $e instanceof GalaxyPartnerAuthorizationException ? $e->missingScopes() : null,
+            'error' => $e->getMessage(),
+        ], fn ($value) => $value !== null && $value !== []);
+    }
+
+    private function debitGalaxySmileys(GalaxyApiClient $galaxy, Request $request): void
+    {
+        $uuid = (string) $request->get('uuid', '');
+        $reference = (string) $request->get('id', '');
+        try {
+            $galaxy->debitSmileys(
+                $uuid,
+                (int) ceil((float) $request->get('smileyamount')),
+                $reference !== '' ? $reference : 'ESHOP-' . $request->get('clientcode') . '-' . time(),
+                $request->get('salesforceAccountId') ?: null
+            );
+        } catch (GalaxyApiException $e) {
+            Log::error('Galaxy smiley debit failed', $this->galaxyLogContext($e, ['uuid' => $uuid, 'reference' => $reference]));
         }
     }
 
