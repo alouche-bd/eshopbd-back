@@ -24,7 +24,7 @@ class GalaxyApiContractTest extends TestCase
         parent::setUp();
         Cache::flush();
         config(['services.galaxy_api' => [
-            'enabled' => true,
+            'mode' => 'new',
             'base_url' => 'https://galaxy.test',
             'keycloak_url' => 'https://kc.test/auth',
             'keycloak_realm' => 's4a',

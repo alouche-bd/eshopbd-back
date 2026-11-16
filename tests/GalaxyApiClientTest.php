@@ -16,7 +16,7 @@ class GalaxyApiClientTest extends TestCase
         parent::setUp();
         Cache::flush();
         config(['services.galaxy_api' => [
-            'enabled' => 'true',
+            'mode' => 'new',
             'base_url' => 'https://galaxy.test/',
             'keycloak_url' => 'https://kc.test/auth/',
             'keycloak_realm' => 's4a',
@@ -37,11 +37,17 @@ class GalaxyApiClientTest extends TestCase
         return ['status' => true, 'statusCode' => $statusCode, 'result' => $result, 'timestamp' => '2026-11-15T10:00:00.000Z'];
     }
 
-    public function testIsEnabledReadsTheFlag()
+    public function testOnlyAnExplicitNewModeSwitchesToGalaxyApi()
     {
-        $this->assertTrue($this->client()->isEnabled());
-        $this->assertFalse((new GalaxyApiClient(['enabled' => 'false']))->isEnabled());
-        $this->assertFalse((new GalaxyApiClient([]))->isEnabled());
+        $this->assertTrue($this->client()->isNewMode());
+        $this->assertTrue((new GalaxyApiClient(['mode' => ' NEW ']))->isNewMode());
+        $this->assertFalse((new GalaxyApiClient([]))->isNewMode());
+        $this->assertFalse((new GalaxyApiClient(['mode' => '']))->isNewMode());
+        $this->assertFalse((new GalaxyApiClient(['mode' => null]))->isNewMode());
+        $this->assertFalse((new GalaxyApiClient(['mode' => 'legacy']))->isNewMode());
+        $this->assertFalse((new GalaxyApiClient(['mode' => 'true']))->isNewMode());
+        $this->assertFalse((new GalaxyApiClient(['enabled' => true]))->isNewMode());
+        $this->assertSame('legacy', (new GalaxyApiClient(['mode' => 'unknown']))->mode());
     }
 
     public function testServiceTokenUsesClientCredentialsAndIsCached()

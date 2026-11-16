@@ -13,7 +13,7 @@ REALM="${GALAXY_KEYCLOAK_REALM:-}"
 CLIENT_ID="${GALAXY_KEYCLOAK_CLIENT_ID:-}"
 CLIENT_SECRET="${GALAXY_KEYCLOAK_CLIENT_SECRET:-}"
 REDIRECT_URI="${GALAXY_LOGIN_REDIRECT_URI:-}"
-ENABLED="${GALAXY_API_ENABLED:-}"
+MODE="${GALAXY_API_MODE:-}"
 
 usage() {
   cat <<'USAGE'
@@ -30,7 +30,7 @@ Options:
   --client-id ID           GALAXY_KEYCLOAK_CLIENT_ID (default: biotech-dental-eshop)
   --client-secret-stdin    read GALAXY_KEYCLOAK_CLIENT_SECRET from stdin
   --redirect-uri URL       GALAXY_LOGIN_REDIRECT_URI
-  --enable | --disable     GALAXY_API_ENABLED=true|false (rollback: --disable)
+  --mode legacy|new        GALAXY_API_MODE (default: legacy; cutover: new, rollback: legacy)
   --check-user UUID        also read the smiley balance of this Galaxy user
   --non-interactive        never prompt; keep current values when not given
   -h, --help               show this help
@@ -49,8 +49,7 @@ while [[ $# -gt 0 ]]; do
     --client-id) CLIENT_ID="$2"; shift 2 ;;
     --client-secret-stdin) IFS= read -r CLIENT_SECRET; shift ;;
     --redirect-uri) REDIRECT_URI="$2"; shift 2 ;;
-    --enable) ENABLED="true"; shift ;;
-    --disable) ENABLED="false"; shift ;;
+    --mode) MODE="$2"; shift 2 ;;
     --check-user) CHECK_UUID="$2"; shift 2 ;;
     --non-interactive) INTERACTIVE=0; shift ;;
     -h|--help) usage; exit 0 ;;
@@ -162,7 +161,12 @@ set_env() {
   '
 }
 
-ENABLED="$(ask GALAXY_API_ENABLED "${ENABLED}" "true")"
+MODE="$(ask GALAXY_API_MODE "${MODE}" "legacy")"
+MODE="$(printf '%s' "${MODE}" | tr '[:upper:]' '[:lower:]' | tr -d '[:space:]')"
+if [[ "${MODE}" != "new" && "${MODE}" != "legacy" ]]; then
+  record KO "GALAXY_API_MODE must be legacy or new (got: ${MODE})"
+  exit 1
+fi
 BASE_URL="$(ask GALAXY_API_BASE_URL "${BASE_URL}" "https://01.fr.api.biotechgalaxy.com")"
 KEYCLOAK_URL="$(ask GALAXY_KEYCLOAK_URL "${KEYCLOAK_URL}" "https://01.fr.oauth.biotechgalaxy.com/auth")"
 REALM="$(ask GALAXY_KEYCLOAK_REALM "${REALM}" "s4a")"
@@ -170,7 +174,7 @@ CLIENT_ID="$(ask GALAXY_KEYCLOAK_CLIENT_ID "${CLIENT_ID}" "biotech-dental-eshop"
 REDIRECT_URI="$(ask GALAXY_LOGIN_REDIRECT_URI "${REDIRECT_URI}" "https://shop.biotech-dental.com/login-sso")"
 CLIENT_SECRET="$(ask_secret GALAXY_KEYCLOAK_CLIENT_SECRET "${CLIENT_SECRET}")"
 
-set_env GALAXY_API_ENABLED "${ENABLED}"
+set_env GALAXY_API_MODE "${MODE}"
 set_env GALAXY_API_BASE_URL "${BASE_URL%/}"
 set_env GALAXY_KEYCLOAK_URL "${KEYCLOAK_URL%/}"
 set_env GALAXY_KEYCLOAK_REALM "${REALM}"
@@ -180,7 +184,7 @@ set_env GALAXY_LOGIN_REDIRECT_URI "${REDIRECT_URI}"
 if [[ -z "$(current GALAXY_API_TIMEOUT)" ]]; then
   set_env GALAXY_API_TIMEOUT "15"
 fi
-record OK ".env updated (${ENV_FILE})"
+record OK ".env updated (${ENV_FILE}, GALAXY_API_MODE=${MODE})"
 
 if [[ -z "${CLIENT_SECRET}" ]]; then
   record KO "GALAXY_KEYCLOAK_CLIENT_SECRET is empty"

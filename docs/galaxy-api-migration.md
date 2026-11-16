@@ -12,7 +12,12 @@ Ces services sont remplacés par **galaxy-api** (NestJS) et par Keycloak `s4a` c
 
 Tout l'accès à Galaxy passe par un seul client : `app/Services/Galaxy/GalaxyApiClient.php`. Il gère les tokens Keycloak, déballe l'enveloppe standard `{status, statusCode, result, timestamp}` et transforme les erreurs `{status: false, statusCode, message, code, errors?, details?}` en `GalaxyApiException`, qui garde `code` et `details`. Deux sous-classes typées : `GalaxyPartnerAuthorizationException` (403 `PARTNER_CLIENT_UNKNOWN` / `PARTNER_SCOPE_DENIED`, `missingScopes()`) et `GalaxyAccountAmbiguousException` (409 `ACCOUNT_AMBIGUOUS`, `accountCount()`).
 
-Le flag `GALAXY_API_ENABLED` choisit le chemin : `true` pour les nouvelles routes, `false` pour le code legacy, qui reste en place pour le rollback.
+La variable `GALAXY_API_MODE` choisit le chemin, résolue par `App\Services\Galaxy\GalaxyApiMode` et lue par `GalaxyApiClient::isNewMode()` à chaque point d'entrée (`login-sso`, `reverse-login-sso`, `galaxy/login-url`, `getSmileys`, débit de `post-order`) :
+
+- `legacy` (**défaut** : valeur absente, vide ou inconnue) : exactement le comportement de `main`, avec le SSO broker, `URL_S4A` (`smileys/total`, `smileys/consume`), le token `OAUTH_URI` + `S4A_CLIENT` / `S4A_SECRET` et les mêmes payloads. Aucune variable `GALAXY_API_BASE_URL` / `GALAXY_KEYCLOAK_*` n'est lue ni requise, aucun appel ne part vers galaxy-api, et `GET /api/galaxy/login-url` répond 404 ;
+- `new` (valeur explicite, insensible à la casse) : les nouvelles routes galaxy-api décrites ci-dessous.
+
+La branche peut donc être fusionnée et déployée avant le cutover sans changer le comportement.
 
 ## Correspondance des appels
 
@@ -29,11 +34,11 @@ Le flag `GALAXY_API_ENABLED` choisit le chemin : `true` pour les nouvelles route
 
 ## Variables d'environnement
 
-À ajouter dans `.env` (le script d'installation les écrit) :
+À ajouter dans `.env` (le script d'installation les écrit). Seul `GALAXY_API_MODE=new` les rend nécessaires : en `legacy`, le back démarre et fonctionne sans elles, avec les variables legacy (`URL_SSO`, `BROKER_*`, `URL_S4A`, `OAUTH_URI`, `S4A_CLIENT`, `S4A_SECRET`) :
 
 | Variable | Exemple prod | Rôle |
 |---|---|---|
-| `GALAXY_API_ENABLED` | `true` | `false` pour revenir au legacy |
+| `GALAXY_API_MODE` | `legacy` | `legacy` (défaut, valeur absente ou vide) = SSO broker + S4A legacy ; `new` = nouvelles routes galaxy-api, à poser au cutover |
 | `GALAXY_API_BASE_URL` | `https://01.fr.api.biotechgalaxy.com` | base galaxy-api (recette : `https://01.api.new-recette.biotechgalaxy.secure4all.tech`, préprod : `https://01.api.preprod.biotechgalaxy.secure4all.tech`) |
 | `GALAXY_KEYCLOAK_URL` | `https://01.fr.oauth.biotechgalaxy.com/auth` | base Keycloak, avant `/realms` |
 | `GALAXY_KEYCLOAK_REALM` | `s4a` | realm |
@@ -118,13 +123,14 @@ echo "$SECRET" | scripts/setup-galaxy-api.sh \
   --keycloak-url https://01.oauth.recette.biotechgalaxy.secure4all.tech/auth \
   --redirect-uri https://<front-recette>/login-sso
 scripts/setup-galaxy-api.sh --check-user <galaxyUuid>   # lit aussi un solde de smileys
-scripts/setup-galaxy-api.sh --disable --non-interactive # rollback
+scripts/setup-galaxy-api.sh --mode new --non-interactive    # cutover
+scripts/setup-galaxy-api.sh --mode legacy --non-interactive # rollback
 ```
 
 Le script :
 
 1. vérifie `curl` et `php` ;
-2. met à jour `.env` (idempotent, `chmod 600`) ;
+2. met à jour `.env` (idempotent, `chmod 600`), avec `GALAXY_API_MODE=legacy` par défaut : seul `--mode new` (ou une valeur `new` déjà présente) bascule ;
 3. demande un token `client_credentials` à Keycloak `s4a` pour valider le client et le secret ;
 4. appelle `GET /health` sur galaxy-api ;
 5. affiche un récapitulatif OK/KO.
@@ -135,16 +141,18 @@ Il n'affiche jamais le secret et ne le passe jamais en argument de commande.
 
 1. **galaxy-api** : déployer une version qui contient `partner_client` (pile au-dessus de `feat/eshop-new-routes`, validée à `6e6fc05`), en recette, puis en préprod et en prod. Vérifier que la plateforme `BIOTECH_DENTAL_E_SHOP` existe, puis insérer la ligne `partner_client` (SQL ci-dessus).
 2. **Keycloak** : créer ou ajuster le client `biotech-dental-eshop` (ci-dessus), avec le compte de service et le mapper d'audience.
-3. **Back e-shop** : déployer cette branche avec `GALAXY_API_ENABLED=false`, lancer `scripts/setup-galaxy-api.sh`, puis passer `GALAXY_API_ENABLED=true`.
-4. **Front e-shop** : déployer la branche `feat/galaxy-api-new-routes` du front. Elle reste compatible avec un back en mode legacy (`?token=`).
-5. **galaxy-front** : la planète `biotech` est déjà en stratégie `KEYCLOAK` et pointe sur `https://shop.biotech-dental.com/login-sso`. Rien à changer.
+3. **Back e-shop** : fusionner et déployer cette branche à l'avance, sans `GALAXY_API_MODE` (ou avec `legacy`) : rien ne change. Lancer `scripts/setup-galaxy-api.sh` pour écrire et valider les variables `GALAXY_*` sans changer de mode.
+4. **Cutover back** : `GALAXY_API_MODE=new` dans les variables de l'environnement (Railway) ou `scripts/setup-galaxy-api.sh --mode new --non-interactive`, puis redéployer. Aucun changement de code.
+5. **Front e-shop** : la branche `feat/galaxy-api-new-routes` du front a le même interrupteur (`REACT_APP_GALAXY_API_MODE`, défaut `legacy`) ; au cutover, la passer à `new` et redéployer le front, après le back.
+6. **galaxy-front** : la planète `biotech` est déjà en stratégie `KEYCLOAK` et pointe sur `https://shop.biotech-dental.com/login-sso`. Rien à changer.
 
 ## Rollback
 
-Repasser `GALAXY_API_ENABLED=false` sur le back (`scripts/setup-galaxy-api.sh --disable --non-interactive`) puis redémarrer. Le code legacy (SSO broker, S4A) est toujours là et réutilise les anciennes variables. Le front n'a pas besoin d'être redéployé : une arrivée `/login-sso?token=…` retrouve le flux legacy.
+Remettre `GALAXY_API_MODE=legacy` (ou supprimer la variable) sur le back (`scripts/setup-galaxy-api.sh --mode legacy --non-interactive` en local) puis redéployer. Le code legacy (SSO broker, S4A) est toujours là et réutilise les anciennes variables, qui doivent rester définies tant que le rollback doit rester possible. Remettre aussi `REACT_APP_GALAXY_API_MODE=legacy` sur le front et le reconstruire.
 
 ## Tests
 
+- `vendor/bin/phpunit --filter GalaxyLegacyMode` : le mode par défaut est `legacy` (absent, vide, inconnu, ancien `enabled`), le solde et le débit partent vers `URL_S4A` avec le token `OAUTH_URI` legacy sans aucun appel à galaxy-api ni à Keycloak `GALAXY_KEYCLOAK_*`, `galaxy/login-url` répond 404, et `new` appelle les routes `/integrations/eshop/*`.
 - `vendor/bin/phpunit --filter Galaxy` : tests unitaires du client (enveloppe, erreurs, cache du token, PKCE, `state` à usage unique) et des routes `getSmileys`, `galaxy/login-url`, `login-sso` et `reverse-login-sso` (Keycloak et galaxy-api simulés avec `Http::fake`), hors ligne.
 - `vendor/bin/phpunit --filter GalaxyApiContract` : tests de contrat contre une galaxy-api simulée à partir de réponses enregistrées. `tests/fixtures/galaxy-api/openapi-eshop.json` est l'extrait e-shop (`paths` `/integrations/eshop/*` et `components.schemas` `PartnerUserDto`, `EshopSmileyBalanceDto`, `EshopSmileyDebitDto`, `EshopSmileyDebitResponseDto`) du document OpenAPI généré par `npm run doc:postman` sur galaxy-api au commit `6e6fc05`. `tests/fixtures/galaxy-api/responses.json` contient les réponses, dans l'enveloppe réelle (`response.interceptor.ts`, `global-exception.filter.ts`), y compris les refus `partner_client` et les erreurs de compte. Le test valide chaque fixture contre les schémas, vérifie chemins, query et corps du débit contre le document, et fait passer `getSmileys` et `reverse-login-sso` par chaque réponse. Pour suivre une nouvelle version de galaxy-api : régénérer le document, réextraire ces chemins et schémas, mettre à jour `source.commit` dans les deux fichiers et relancer le test.
 - `vendor/bin/phpunit` : la suite complète. Les tests `MiddlewareTest` appellent le vrai middleware Sage et échouent sans accès réseau ni secret.

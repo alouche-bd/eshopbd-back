@@ -465,7 +465,7 @@ class AuthController extends Controller
     public function loginWithSso(Request $request)
     {
         $galaxy = app(GalaxyApiClient::class);
-        if ($galaxy->isEnabled()) {
+        if ($galaxy->isNewMode()) {
             return $this->loginWithGalaxyCode($galaxy, $request);
         }
 
@@ -502,7 +502,7 @@ HKHc9LAa+CRIEBX1jQIDAQAB
     function reverseLoginSSO(Request $request)
     {
         $galaxy = app(GalaxyApiClient::class);
-        if ($galaxy->isEnabled()) {
+        if ($galaxy->isNewMode()) {
             try {
                 $tokens = $galaxy->passwordLogin((string) $request->get('email', ''), (string) $request->get('password', ''));
                 return $this->loginGalaxyUser($galaxy->me($tokens['access_token']));
@@ -561,7 +561,7 @@ HKHc9LAa+CRIEBX1jQIDAQAB
     public function galaxyLoginUrl()
     {
         $galaxy = app(GalaxyApiClient::class);
-        if (!$galaxy->isEnabled()) {
+        if (!$galaxy->isNewMode()) {
             return response()->json(['success' => 0, 'message' => 'Galaxy API login is disabled'], 404);
         }
 

@@ -20,7 +20,7 @@ return [
         'secret_oauth' => env('S4A_SECRET'),
     ],
     'galaxy_api' => [
-        'enabled' => env('GALAXY_API_ENABLED', false),
+        'mode' => env('GALAXY_API_MODE', 'legacy'),
         'base_url' => env('GALAXY_API_BASE_URL'),
         'keycloak_url' => env('GALAXY_KEYCLOAK_URL'),
         'keycloak_realm' => env('GALAXY_KEYCLOAK_REALM', 's4a'),

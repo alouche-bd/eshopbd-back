@@ -7,7 +7,7 @@ class GalaxyLoginUrlRouteTest extends TestCase
     public function testLoginUrlPointsAtKeycloak()
     {
         config(['services.galaxy_api' => [
-            'enabled' => true,
+            'mode' => 'new',
             'keycloak_url' => 'https://kc.test/auth',
             'keycloak_realm' => 's4a',
             'keycloak_client_id' => 'biotech-dental-eshop',
@@ -26,7 +26,7 @@ class GalaxyLoginUrlRouteTest extends TestCase
 
     public function testLoginUrlIsUnavailableWhenTheFlagIsOff()
     {
-        config(['services.galaxy_api' => ['enabled' => false]]);
+        config(['services.galaxy_api' => ['mode' => 'legacy']]);
 
         $this->get('/api/galaxy/login-url');
 
@@ -35,7 +35,7 @@ class GalaxyLoginUrlRouteTest extends TestCase
 
     public function testCodeAndStateAreRequired()
     {
-        config(['services.galaxy_api' => ['enabled' => true]]);
+        config(['services.galaxy_api' => ['mode' => 'new']]);
 
         $this->post('/api/login-sso', ['token' => 'legacy-token']);
 
@@ -45,7 +45,7 @@ class GalaxyLoginUrlRouteTest extends TestCase
     public function testRejectedGalaxyCredentialsAnswer401()
     {
         config(['services.galaxy_api' => [
-            'enabled' => true,
+            'mode' => 'new',
             'keycloak_url' => 'https://kc.test/auth',
             'keycloak_realm' => 's4a',
             'keycloak_client_id' => 'biotech-dental-eshop',
@@ -64,7 +64,7 @@ class GalaxyLoginUrlRouteTest extends TestCase
 
     public function testUnknownLoginStateAnswers401()
     {
-        config(['services.galaxy_api' => ['enabled' => true]]);
+        config(['services.galaxy_api' => ['mode' => 'new']]);
 
         $this->post('/api/login-sso', ['code' => 'abc', 'state' => 'never-issued']);
 
@@ -75,7 +75,7 @@ class GalaxyLoginUrlRouteTest extends TestCase
     public function testUnregisteredPartnerClientIsNotReportedAsBadCredentials()
     {
         config(['services.galaxy_api' => [
-            'enabled' => true,
+            'mode' => 'new',
             'base_url' => 'https://galaxy.test',
             'keycloak_url' => 'https://kc.test/auth',
             'keycloak_realm' => 's4a',

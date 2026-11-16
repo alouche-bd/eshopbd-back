@@ -22,9 +22,14 @@ class GalaxyApiClient
         $this->config = $config ?? (array) config('services.galaxy_api', []);
     }
 
-    public function isEnabled(): bool
+    public function mode(): string
     {
-        return filter_var($this->config['enabled'] ?? false, FILTER_VALIDATE_BOOLEAN);
+        return GalaxyApiMode::resolve($this->config['mode'] ?? null);
+    }
+
+    public function isNewMode(): bool
+    {
+        return $this->mode() === GalaxyApiMode::NEW;
     }
 
     public function serviceToken(): string

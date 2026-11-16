@@ -325,7 +325,7 @@ class MiddlewareController extends Controller
             $response = $promise->wait();
 
             $galaxy = app(GalaxyApiClient::class);
-            if ($request->get('smileyamount') > 0 && $galaxy->isEnabled()) {
+            if ($request->get('smileyamount') > 0 && $galaxy->isNewMode()) {
                 $this->debitGalaxySmileys($galaxy, $request);
             } elseif ($request->get('smileyamount') > 0) {
                 $params = [
@@ -899,7 +899,7 @@ class MiddlewareController extends Controller
     function getSmileys(Request $request, $uuid)
     {
         $galaxy = app(GalaxyApiClient::class);
-        if ($galaxy->isEnabled()) {
+        if ($galaxy->isNewMode()) {
             return $this->getGalaxySmileys($galaxy, $uuid, $request->query('salesforceAccountId'));
         }
 
